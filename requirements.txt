@@ -1,0 +1,19 @@
+# AI图片生成项目依赖
+# 基础依赖
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+diffusers>=0.21.0
+accelerate>=0.20.0
+
+# 图像处理
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# 工具库
+tqdm>=4.65.0
+safetensors>=0.3.0
+
+# 可选：用于更好的性能
+# xformers  # 需要根据CUDA版本安装，注释掉避免安装问题
+
