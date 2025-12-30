@@ -1,314 +1,315 @@
 """
-综合示例 5: 完整功能演示
-展示文本生成图片和图片生成图片的完整工作流程
-包含多个实际应用场景
+综合示例: 完整功能演示
+展示所有功能模块的完整工作流程
+包括：文生图、文生视频、图生图、图生视频、视频生视频、图片识别、视频识别
 """
 
-from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
-import torch
-from PIL import Image
-from utils import save_image, load_image, get_device, set_seed
-from config import (
-    DEFAULT_STEPS,
-    DEFAULT_GUIDANCE_SCALE,
-    DEFAULT_HEIGHT,
-    DEFAULT_WIDTH
-)
 import os
+import sys
+
+# 添加项目根目录到路径
+sys.path.append(os.path.dirname(__file__))
+
+from modules.text_to_image import AdvancedTextToImage
+from modules.image_to_image import AdvancedImageToImage
+from modules.text_to_video import AdvancedTextToVideo
+from modules.image_to_video import AdvancedImageToVideo
+from modules.video_to_video import AdvancedVideoToVideo
+from modules.image_recognition import AdvancedImageRecognition
+from modules.video_recognition import AdvancedVideoRecognition
 
 
-class ComprehensiveImageGenerator:
-    """综合图片生成器 - 整合所有功能"""
+class ComprehensiveAIGenerator:
+    """综合AI生成器 - 整合所有功能"""
     
-    def __init__(self, model_name: str = "runwayml/stable-diffusion-v1-5"):
-        """
-        初始化生成器
-        
-        Args:
-            model_name: 模型名称
-        """
-        self.device = get_device()
-        self.model_name = model_name
-        self.text_pipe = None
-        self.img2img_pipe = None
-        print(f"初始化综合图片生成器，使用模型: {model_name}")
-    
-    def load_text_to_image_model(self):
-        """加载文本生成图片模型"""
-        if self.text_pipe is None:
-            print("\n正在加载文本生成图片模型...")
-            self.text_pipe = StableDiffusionPipeline.from_pretrained(
-                self.model_name,
-                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
-                safety_checker=None,
-                requires_safety_checker=False
-            )
-            self.text_pipe = self.text_pipe.to(self.device)
-            try:
-                self.text_pipe.enable_attention_slicing()
-            except:
-                pass
-            print("文本生成图片模型加载完成！")
-    
-    def load_image_to_image_model(self):
-        """加载图片生成图片模型"""
-        if self.img2img_pipe is None:
-            print("\n正在加载图片生成图片模型...")
-            self.img2img_pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-                self.model_name,
-                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
-                safety_checker=None,
-                requires_safety_checker=False
-            )
-            self.img2img_pipe = self.img2img_pipe.to(self.device)
-            try:
-                self.img2img_pipe.enable_attention_slicing()
-            except:
-                pass
-            print("图片生成图片模型加载完成！")
-    
-    def text_to_image(
-        self,
-        prompt: str,
-        negative_prompt: str = None,
-        num_inference_steps: int = DEFAULT_STEPS,
-        guidance_scale: float = DEFAULT_GUIDANCE_SCALE,
-        height: int = DEFAULT_HEIGHT,
-        width: int = DEFAULT_WIDTH,
-        seed: int = None,
-        output_name: str = None
-    ):
-        """
-        文本生成图片
-        
-        Returns:
-            生成的图片和文件路径
-        """
-        self.load_text_to_image_model()
-        
-        if seed is not None:
-            set_seed(seed)
-        
-        print(f"\n{'='*60}")
-        print(f"文本生成图片")
-        print(f"  提示词: {prompt}")
-        if negative_prompt:
-            print(f"  负面提示词: {negative_prompt}")
-        print(f"{'='*60}\n")
-        
-        with torch.no_grad():
-            result = self.text_pipe(
-                prompt=prompt,
-                negative_prompt=negative_prompt,
-                num_inference_steps=num_inference_steps,
-                guidance_scale=guidance_scale,
-                height=height,
-                width=width
-            )
-            image = result.images[0]
-        
-        filepath = save_image(image, output_name, "comprehensive")
-        print(f"✅ 生成完成！")
-        return image, filepath
-    
-    def image_to_image(
-        self,
-        image_path: str,
-        prompt: str,
-        negative_prompt: str = None,
-        strength: float = 0.75,
-        num_inference_steps: int = DEFAULT_STEPS,
-        guidance_scale: float = DEFAULT_GUIDANCE_SCALE,
-        seed: int = None,
-        output_name: str = None
-    ):
-        """
-        图片生成图片
-        
-        Returns:
-            生成的图片和文件路径
-        """
-        self.load_image_to_image_model()
-        
-        init_image = load_image(image_path)
-        max_size = 512
-        if max(init_image.size) > max_size:
-            ratio = max_size / max(init_image.size)
-            new_size = (int(init_image.size[0] * ratio), int(init_image.size[1] * ratio))
-            init_image = init_image.resize(new_size, Image.Resampling.LANCZOS)
-        
-        if seed is not None:
-            set_seed(seed)
-        
-        print(f"\n{'='*60}")
-        print(f"图片生成图片")
-        print(f"  输入图片: {image_path}")
-        print(f"  提示词: {prompt}")
-        print(f"  修改强度: {strength}")
-        print(f"{'='*60}\n")
-        
-        with torch.no_grad():
-            result = self.img2img_pipe(
-                prompt=prompt,
-                negative_prompt=negative_prompt,
-                image=init_image,
-                strength=strength,
-                num_inference_steps=num_inference_steps,
-                guidance_scale=guidance_scale
-            )
-            image = result.images[0]
-        
-        filepath = save_image(image, output_name, "comprehensive")
-        print(f"✅ 生成完成！")
-        return image, filepath
-    
-    def workflow_example(self):
-        """
-        完整工作流示例：
-        1. 先用文本生成一张基础图片
-        2. 再用这张图片进行风格转换
-        """
-        print("\n" + "="*60)
-        print("完整工作流示例")
+    def __init__(self):
+        """初始化所有生成器"""
         print("="*60)
+        print("初始化综合AI生成器")
+        print("="*60)
+        
+        self.text_to_image_gen = AdvancedTextToImage()
+        self.image_to_image_gen = AdvancedImageToImage()
+        self.text_to_video_gen = AdvancedTextToVideo()
+        self.image_to_video_gen = AdvancedImageToVideo()
+        self.video_to_video_gen = AdvancedVideoToVideo()
+        self.image_recognizer = AdvancedImageRecognition()
+        self.video_recognizer = AdvancedVideoRecognition()
+        
+        print("\n✅ 所有模块初始化完成！")
+    
+    def demo_text_to_image(self):
+        """演示文本生成图片"""
+        print("\n" + "="*60)
+        print("功能1: 文本生成图片")
+        print("="*60)
+        
+        prompt = "a beautiful landscape with mountains and lake, sunset, peaceful, photorealistic"
+        self.text_to_image_gen.generate(
+            prompt=prompt,
+            negative_prompt="blurry, low quality, distorted",
+            output_name="comprehensive_text_to_image"
+        )
+    
+    def demo_image_to_image(self, image_path: str):
+        """演示图片生成图片"""
+        print("\n" + "="*60)
+        print("功能2: 图片生成图片")
+        print("="*60)
+        
+        if not os.path.exists(image_path):
+            print(f"⚠️  图片不存在: {image_path}")
+            print("跳过此功能演示")
+            return
+        
+        self.image_to_image_gen.generate(
+            image_path=image_path,
+            prompt="oil painting style, artistic, detailed brushstrokes",
+            strength=0.7,
+            output_name="comprehensive_image_to_image"
+        )
+    
+    def demo_text_to_video(self):
+        """演示文本生成视频"""
+        print("\n" + "="*60)
+        print("功能3: 文本生成视频")
+        print("="*60)
+        print("注意：视频生成需要较长时间，请耐心等待...")
+        
+        prompt = "a beautiful sunset over the ocean, peaceful, serene"
+        self.text_to_video_gen.generate(
+            prompt=prompt,
+            num_frames=16,
+            fps=8,
+            output_name="comprehensive_text_to_video"
+        )
+    
+    def demo_image_to_video(self, image_path: str):
+        """演示图片生成视频"""
+        print("\n" + "="*60)
+        print("功能4: 图片生成视频")
+        print("="*60)
+        print("注意：视频生成需要较长时间，请耐心等待...")
+        
+        if not os.path.exists(image_path):
+            print(f"⚠️  图片不存在: {image_path}")
+            print("跳过此功能演示")
+            return
+        
+        self.image_to_video_gen.generate(
+            image_path=image_path,
+            num_frames=14,
+            fps=7,
+            motion_bucket_id=127,
+            output_name="comprehensive_image_to_video"
+        )
+    
+    def demo_video_to_video(self, video_path: str):
+        """演示视频生成视频"""
+        print("\n" + "="*60)
+        print("功能5: 视频生成视频")
+        print("="*60)
+        print("注意：视频处理需要较长时间，请耐心等待...")
+        
+        if not os.path.exists(video_path):
+            print(f"⚠️  视频不存在: {video_path}")
+            print("跳过此功能演示")
+            return
+        
+        self.video_to_video_gen.generate(
+            video_path=video_path,
+            prompt="anime style, vibrant colors, detailed",
+            strength=0.75,
+            num_frames=20,  # 限制处理帧数以节省时间
+            fps=8,
+            output_name="comprehensive_video_to_video"
+        )
+    
+    def demo_image_recognition(self, image_path: str):
+        """演示图片识别"""
+        print("\n" + "="*60)
+        print("功能6: 图片识别")
+        print("="*60)
+        
+        if not os.path.exists(image_path):
+            print(f"⚠️  图片不存在: {image_path}")
+            print("跳过此功能演示")
+            return
+        
+        # 分类
+        print("\n【图片分类】")
+        classification_results = self.image_recognizer.classify(
+            image_path,
+            top_k=5
+        )
+        print("\n分类结果:")
+        for label, confidence in classification_results:
+            print(f"  {label}: {confidence:.2f}%")
+        
+        # 目标检测
+        print("\n【目标检测】")
+        detection_results = self.image_recognizer.detect(
+            image_path,
+            confidence_threshold=0.5,
+            save_result=True
+        )
+        print(f"\n检测到 {len(detection_results)} 个物体:")
+        for det in detection_results:
+            print(f"  {det['label']}: {det['confidence']:.2f}%")
+    
+    def demo_video_recognition(self, video_path: str):
+        """演示视频识别"""
+        print("\n" + "="*60)
+        print("功能7: 视频识别")
+        print("="*60)
+        
+        if not os.path.exists(video_path):
+            print(f"⚠️  视频不存在: {video_path}")
+            print("跳过此功能演示")
+            return
+        
+        # 分类
+        print("\n【视频分类】")
+        classification_results = self.video_recognizer.classify(
+            video_path,
+            sample_frames=10,
+            top_k=5
+        )
+        print("\n分类结果:")
+        for result in classification_results:
+            print(f"  {result['label']}: {result['percentage']:.1f}% (置信度: {result['avg_confidence']:.2f}%)")
+        
+        # 目标检测
+        print("\n【视频目标检测】")
+        detection_results = self.video_recognizer.detect(
+            video_path,
+            sample_frames=10,
+            confidence_threshold=0.5
+        )
+        print("\n检测结果:")
+        for result in detection_results:
+            print(f"  {result['label']}: {result['detections']} 次检测 (出现在 {result['percentage']:.1f}% 的帧中)")
+    
+    def demo_complete_workflow(self, image_path: str = None):
+        """演示完整工作流"""
+        print("\n" + "="*60)
+        print("完整工作流演示")
+        print("="*60)
+        print("\n工作流：文本生成图片 -> 图片识别 -> 图片生成视频 -> 视频识别")
         
         # 步骤1: 文本生成图片
         print("\n【步骤1】文本生成图片")
-        prompt1 = "a beautiful mountain landscape, lake, sunset, peaceful"
-        image1, path1 = self.text_to_image(
-            prompt=prompt1,
-            negative_prompt="blurry, low quality, distorted",
-            num_inference_steps=50,
-            output_name="workflow_step1_landscape"
+        prompt = "a beautiful mountain landscape, lake, sunset, peaceful"
+        image, image_path_generated = self.text_to_image_gen.generate(
+            prompt=prompt,
+            negative_prompt="blurry, low quality",
+            output_name="workflow_step1_image"
         )
         
-        # 步骤2: 图片生成图片（风格转换）
-        print("\n【步骤2】图片生成图片（风格转换）")
-        image2, path2 = self.image_to_image(
-            image_path=path1,
-            prompt="oil painting style, artistic, detailed brushstrokes, Van Gogh style",
-            strength=0.7,
-            output_name="workflow_step2_painting"
-        )
+        # 步骤2: 图片识别
+        print("\n【步骤2】图片识别")
+        if os.path.exists(image_path_generated):
+            classification_results = self.image_recognizer.classify(
+                image_path_generated,
+                top_k=3
+            )
+            print("识别结果:")
+            for label, confidence in classification_results:
+                print(f"  {label}: {confidence:.2f}%")
+        
+        # 步骤3: 图片生成视频
+        print("\n【步骤3】图片生成视频")
+        if os.path.exists(image_path_generated):
+            self.image_to_video_gen.generate(
+                image_path=image_path_generated,
+                num_frames=14,
+                fps=7,
+                output_name="workflow_step3_video"
+            )
         
         print("\n✅ 完整工作流执行完成！")
-        print(f"  原始图片: {path1}")
-        print(f"  转换后图片: {path2}")
-        
-        return image1, image2, path1, path2
-
-
-def demo_scenarios():
-    """演示多个实际应用场景"""
-    generator = ComprehensiveImageGenerator()
-    
-    scenarios = [
-        {
-            "name": "场景1: 创意设计 - 生成概念图",
-            "type": "text_to_image",
-            "prompt": "a futuristic cityscape at night, neon lights, cyberpunk style, detailed, 4k",
-            "negative_prompt": "blurry, low quality, distorted",
-            "output_name": "scenario1_futuristic_city"
-        },
-        {
-            "name": "场景2: 艺术创作 - 生成艺术作品",
-            "type": "text_to_image",
-            "prompt": "a serene Japanese garden, cherry blossoms, traditional architecture, peaceful, watercolor style",
-            "negative_prompt": "ugly, distorted, low quality",
-            "output_name": "scenario2_japanese_garden"
-        },
-        {
-            "name": "场景3: 产品设计 - 生成产品概念",
-            "type": "text_to_image",
-            "prompt": "a modern minimalist chair, white background, studio lighting, product photography, high quality",
-            "negative_prompt": "cluttered, low quality, blurry",
-            "output_name": "scenario3_product_chair"
-        }
-    ]
-    
-    print("\n" + "="*60)
-    print("多场景演示")
-    print("="*60)
-    
-    for i, scenario in enumerate(scenarios, 1):
-        print(f"\n{scenario['name']}")
-        if scenario['type'] == 'text_to_image':
-            generator.text_to_image(
-                prompt=scenario['prompt'],
-                negative_prompt=scenario.get('negative_prompt'),
-                output_name=scenario['output_name']
-            )
-    
-    # 如果有输入图片，演示图片生成图片场景
-    example_dir = "examples"
-    if os.path.exists(example_dir):
-        image_files = [f for f in os.listdir(example_dir) 
-                      if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-        if image_files:
-            print("\n" + "="*60)
-            print("图片生成图片场景演示")
-            print("="*60)
-            
-            image_path = os.path.join(example_dir, image_files[0])
-            print(f"\n使用输入图片: {image_path}")
-            
-            # 场景4: 风格转换
-            print("\n【场景4】风格转换")
-            generator.image_to_image(
-                image_path=image_path,
-                prompt="anime style, vibrant colors, detailed, studio ghibli",
-                strength=0.75,
-                output_name="scenario4_anime_style"
-            )
-            
-            # 场景5: 季节变换
-            print("\n【场景5】季节变换")
-            generator.image_to_image(
-                image_path=image_path,
-                prompt="winter scene, snow, cold atmosphere, peaceful",
-                strength=0.7,
-                output_name="scenario5_winter"
-            )
 
 
 def main():
     """主函数"""
     print("="*60)
-    print("AI 图片生成 - 综合示例")
+    print("AI 综合功能演示")
     print("="*60)
-    print("\n本示例展示完整的功能和工作流程")
-    print("包括：文本生成图片、图片生成图片、完整工作流")
+    print("\n本示例将演示所有功能模块")
+    print("包括：文生图、文生视频、图生图、图生视频、视频生视频、图片识别、视频识别")
+    print("\n注意：")
+    print("- 视频生成和处理需要较长时间")
+    print("- 某些功能需要输入文件，如果文件不存在将跳过")
+    print("- 首次运行需要下载模型，请确保网络连接稳定")
     
-    generator = ComprehensiveImageGenerator()
+    generator = ComprehensiveAIGenerator()
     
-    # 示例1: 基础文本生成图片
+    # 检查示例文件
+    examples_images_dir = "examples/images"
+    examples_videos_dir = "examples/videos"
+    
+    image_files = []
+    video_files = []
+    
+    if os.path.exists(examples_images_dir):
+        image_files = [f for f in os.listdir(examples_images_dir) 
+                      if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    
+    if os.path.exists(examples_videos_dir):
+        video_files = [f for f in os.listdir(examples_videos_dir) 
+                      if f.lower().endswith(('.mp4', '.avi', '.mov'))]
+    
+    # 演示各个功能
     print("\n" + "="*60)
-    print("示例1: 基础文本生成图片")
+    print("开始功能演示")
     print("="*60)
-    generator.text_to_image(
-        prompt="a cute cat playing with a ball of yarn, cartoon style, colorful, detailed",
-        negative_prompt="blurry, low quality, distorted",
-        output_name="example1_cat"
-    )
     
-    # 示例2: 完整工作流
-    print("\n" + "="*60)
-    print("示例2: 完整工作流（文本生成 -> 风格转换）")
-    print("="*60)
-    generator.workflow_example()
+    # 1. 文本生成图片
+    generator.demo_text_to_image()
     
-    # 示例3: 多场景演示
-    print("\n" + "="*60)
-    print("示例3: 多场景演示")
-    print("="*60)
-    demo_scenarios()
+    # 2. 图片生成图片（如果有输入图片）
+    if image_files:
+        image_path = os.path.join(examples_images_dir, image_files[0])
+        generator.demo_image_to_image(image_path)
+    
+    # 3. 文本生成视频（注释掉以节省时间，取消注释以运行）
+    # generator.demo_text_to_video()
+    
+    # 4. 图片生成视频（如果有输入图片）
+    if image_files:
+        image_path = os.path.join(examples_images_dir, image_files[0])
+        # generator.demo_image_to_video(image_path)  # 注释掉以节省时间
+    
+    # 5. 视频生成视频（如果有输入视频）
+    if video_files:
+        video_path = os.path.join(examples_videos_dir, video_files[0])
+        # generator.demo_video_to_video(video_path)  # 注释掉以节省时间
+    
+    # 6. 图片识别（如果有输入图片）
+    if image_files:
+        image_path = os.path.join(examples_images_dir, image_files[0])
+        generator.demo_image_recognition(image_path)
+    
+    # 7. 视频识别（如果有输入视频）
+    if video_files:
+        video_path = os.path.join(examples_videos_dir, video_files[0])
+        # generator.demo_video_recognition(video_path)  # 注释掉以节省时间
+    
+    # 完整工作流
+    if image_files:
+        image_path = os.path.join(examples_images_dir, image_files[0])
+        # generator.demo_complete_workflow(image_path)  # 注释掉以节省时间
     
     print("\n" + "="*60)
-    print("所有示例执行完成！")
+    print("所有功能演示完成！")
     print("="*60)
-    print("\n生成的图片保存在 outputs/comprehensive/ 目录下")
+    print("\n生成的图片保存在 outputs/images/ 目录下")
+    print("生成的视频保存在 outputs/videos/ 目录下")
+    print("\n提示：")
+    print("- 取消注释相关代码可以运行视频生成和处理功能")
+    print("- 视频功能需要较长时间，请耐心等待")
+    print("- 确保有足够的磁盘空间和内存")
 
 
 if __name__ == "__main__":
     main()
-

@@ -9,10 +9,21 @@ accelerate>=0.20.0
 # 图像处理
 Pillow>=10.0.0
 numpy>=1.24.0
+opencv-python>=4.8.0
+
+# 视频处理
+moviepy>=1.0.3
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+
+# 识别相关
+timm>=0.9.0  # 图像识别模型库
+ultralytics>=8.0.0  # YOLO模型（用于目标检测）
 
 # 工具库
 tqdm>=4.65.0
 safetensors>=0.3.0
+requests>=2.31.0
 
 # 可选：用于更好的性能
 # xformers  # 需要根据CUDA版本安装，注释掉避免安装问题

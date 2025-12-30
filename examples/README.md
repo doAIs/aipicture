@@ -1,70 +1,75 @@
-# 示例图片目录
+# 示例文件说明
 
-此目录用于存放输入图片，用于图片生成图片（Image-to-Image）功能。
+本目录用于存放示例图片和视频文件，供项目中的各种功能使用。
 
-## 📁 目录说明
+## 目录结构
 
-将你想要转换的图片放在此目录下，然后在代码中引用。
-
-## 📝 使用示例
-
-### 准备输入图片
-
-1. 将你的图片文件（支持 JPG、PNG 等格式）复制到此目录
-2. 建议使用清晰、高质量的图片以获得更好的效果
-3. 推荐尺寸：512x512 或 768x768（代码会自动调整）
-
-### 在代码中使用
-
-```python
-from 02_basic_image_to_image import generate_image_from_image
-
-# 使用此目录下的图片
-generate_image_from_image(
-    image_path="examples/your_image.jpg",  # 替换为你的图片文件名
-    prompt="oil painting style, artistic, detailed",
-    strength=0.7,
-    output_name="converted_image"
-)
+```
+examples/
+├── images/          # 示例图片目录
+│   ├── input.jpg    # 输入图片示例
+│   └── ...
+└── videos/          # 示例视频目录
+    ├── input.mp4    # 输入视频示例
+    └── ...
 ```
 
-## 🎨 推荐的图片类型
+## 支持的图片格式
 
-- **风景照**：适合风格转换（油画、水彩、动漫等）
-- **人物照片**：适合风格转换和艺术化处理
-- **建筑照片**：适合风格转换和场景变换
-- **静物照片**：适合添加元素和风格转换
+- `.jpg` / `.jpeg`
+- `.png`
+- `.bmp`
+- `.tiff`
 
-## ⚠️ 注意事项
+## 支持的视频格式
 
-1. **图片格式**：支持 JPG、PNG、JPEG 等常见格式
-2. **图片大小**：建议不超过 2048x2048，代码会自动调整
-3. **图片质量**：使用高质量、清晰的图片效果更好
-4. **版权**：请确保使用的图片有合法使用权
+- `.mp4`
+- `.avi`
+- `.mov`
+- `.mkv`
 
-## 📌 示例场景
+## 使用建议
 
-### 场景1：风格转换
-- 输入：普通照片
-- 提示词：`"oil painting style, artistic, detailed brushstrokes"`
-- 强度：0.5-0.7
+### 图片要求
 
-### 场景2：季节变换
-- 输入：夏季风景照
-- 提示词：`"winter scene, snow, cold atmosphere, peaceful"`
-- 强度：0.6-0.8
+- **尺寸**：建议 512x512 或更大（会自动调整）
+- **格式**：RGB 格式（会自动转换）
+- **大小**：建议小于 10MB
 
-### 场景3：添加元素
-- 输入：风景照
-- 提示词：`"add a beautiful rainbow in the sky, photorealistic"`
-- 强度：0.5-0.6
+### 视频要求
 
-### 场景4：动漫化
-- 输入：真实照片
-- 提示词：`"anime style, vibrant colors, detailed, studio ghibli"`
-- 强度：0.7-0.9
+- **分辨率**：建议 256x256 或更大
+- **时长**：建议 5-30 秒（处理时间与时长成正比）
+- **帧率**：建议 8-30 fps
+- **大小**：建议小于 100MB
 
----
+## 准备示例文件
 
-**提示**：如果没有输入图片，可以先运行 `01_basic_text_to_image.py` 生成一些图片作为输入。
+### 方式1：手动添加
 
+直接将你的图片或视频文件复制到对应的目录：
+- 图片 → `examples/images/`
+- 视频 → `examples/videos/`
+
+### 方式2：使用项目生成
+
+你可以先使用文本生成图片功能生成一些图片，然后用于其他功能：
+
+```python
+from modules.text_to_image import AdvancedTextToImage
+
+generator = AdvancedTextToImage()
+generator.generate(
+    prompt="a beautiful landscape",
+    output_name="test_image"
+)
+# 生成的图片在 outputs/images/ 目录下
+# 可以复制到 examples/images/ 目录使用
+```
+
+## 注意事项
+
+1. 确保文件路径正确
+2. 检查文件格式是否支持
+3. 注意文件大小，过大的文件可能导致内存不足
+4. 视频处理需要较长时间，建议先用短视频测试
