@@ -2,8 +2,13 @@
 图片生成图片模块
 """
 
-from .01_basic_image_to_image import generate_image_from_image
-from .02_advanced_image_to_image import AdvancedImageToImage
+import importlib
+
+_basic_module = importlib.import_module('.01_basic_image_to_image', __package__)
+_advanced_module = importlib.import_module('.02_advanced_image_to_image', __package__)
+
+generate_image_from_image = _basic_module.generate_image_from_image
+AdvancedImageToImage = _advanced_module.AdvancedImageToImage
 
 __all__ = ['generate_image_from_image', 'AdvancedImageToImage']
 

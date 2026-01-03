@@ -8,7 +8,7 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_image, get_device
+from utils import save_image, get_device, load_model_with_fallback
 
 
 def generate_image_from_text(prompt: str, output_name: str = None):
@@ -25,17 +25,16 @@ def generate_image_from_text(prompt: str, output_name: str = None):
     # 获取设备
     device = get_device()
     
-    # 加载模型（首次运行会自动下载，需要一些时间）
-    print("\n正在加载模型（首次运行需要下载，请耐心等待）...")
-    
     # 根据设备选择数据类型
     if device == "cuda":
         torch_dtype = torch.float16
     else:
         torch_dtype = torch.float32
     
-    pipe = StableDiffusionPipeline.from_pretrained(
-        "runwayml/stable-diffusion-v1-5",
+    # 使用带错误处理的模型加载函数
+    pipe = load_model_with_fallback(
+        StableDiffusionPipeline,
+        "sd-legacy/stable-diffusion-v1-5",
         torch_dtype=torch_dtype,
         safety_checker=None,  # 禁用安全检查器以加快速度
         requires_safety_checker=False

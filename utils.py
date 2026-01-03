@@ -290,3 +290,94 @@ def get_video_info(video_path: str) -> dict:
         "frames": frames
     }
 
+
+def load_model_with_fallback(pipeline_class, model_name: str, **kwargs):
+    """
+    加载模型，带错误处理和离线模式支持
+    
+    Args:
+        pipeline_class: Pipeline类（如 StableDiffusionPipeline）
+        model_name: 模型名称
+        **kwargs: 传递给from_pretrained的其他参数
+    
+    Returns:
+        加载的pipeline对象
+    
+    Raises:
+        OSError: 如果模型无法加载且没有本地缓存
+    """
+    import os
+    
+    print(f"\n正在加载模型: {model_name}")
+    print("（首次运行需要下载，请耐心等待）...")
+    
+    # 检查是否启用离线模式
+    offline_mode = os.getenv("HF_HUB_OFFLINE", "0") == "1"
+    local_files_only = os.getenv("HF_HUB_LOCAL_FILES_ONLY", "0") == "1"
+    
+    if offline_mode or local_files_only:
+        print("⚠️  离线模式：仅使用本地缓存的模型")
+        kwargs["local_files_only"] = True
+    
+    try:
+        # 尝试加载模型
+        try:
+            pipe = pipeline_class.from_pretrained(model_name, **kwargs)
+            print("✅ 模型加载成功！")
+            return pipe
+        except (OSError, Exception) as e:
+            # 检查是否是网络相关错误
+            error_str = str(e).lower()
+            is_network_error = any(keyword in error_str for keyword in [
+                'timeout', 'connection', 'connect', 'network', 
+                'max retries', 'connection pool', 'huggingface.co'
+            ])
+            
+            if not is_network_error:
+                # 非网络错误，直接抛出
+                raise
+            
+            # 网络错误，尝试使用本地缓存
+            print("\n⚠️  网络连接失败，尝试使用本地缓存的模型...")
+            print(f"   错误信息: {str(e)[:100]}...")
+            
+            # 检查本地缓存
+            from huggingface_hub import HfFolder
+            cache_dir = HfFolder.get_cache_dir()
+            model_cache_path = os.path.join(cache_dir, "models--" + model_name.replace("/", "--"))
+            
+            if os.path.exists(model_cache_path):
+                print(f"   找到本地缓存: {model_cache_path}")
+                try:
+                    kwargs["local_files_only"] = True
+                    pipe = pipeline_class.from_pretrained(model_name, **kwargs)
+                    print("✅ 从本地缓存加载模型成功！")
+                    return pipe
+                except Exception as cache_error:
+                    print(f"   ❌ 本地缓存加载失败: {cache_error}")
+            
+            # 如果都失败了，提供详细的错误信息
+            print("\n" + "="*60)
+            print("❌ 模型加载失败")
+            print("="*60)
+            print("\n可能的原因：")
+            print("1. 网络连接问题（无法连接到 huggingface.co）")
+            print("2. 模型未下载且本地无缓存")
+            print("\n解决方案：")
+            print("1. 检查网络连接，确保可以访问 huggingface.co")
+            print("2. 使用 VPN 或代理（如果在受限网络环境中）")
+            print("3. 手动下载模型到本地缓存目录")
+            print(f"   缓存目录: {cache_dir}")
+            print("4. 设置环境变量启用离线模式（如果已有本地缓存）:")
+            print("   set HF_HUB_LOCAL_FILES_ONLY=1")
+            print("="*60)
+            raise OSError(
+                f"无法加载模型 '{model_name}': 网络连接失败且本地无缓存。"
+                f"请检查网络连接或手动下载模型。"
+            ) from e
+            
+    except Exception as e:
+        # 其他错误（非网络错误）
+        if "网络" not in str(e) and "connection" not in str(e).lower():
+            print(f"\n❌ 模型加载失败: {e}")
+        raise

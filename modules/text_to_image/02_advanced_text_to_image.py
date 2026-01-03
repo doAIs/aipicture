@@ -36,8 +36,9 @@ class AdvancedTextToImage:
     def load_model(self):
         """加载模型（延迟加载，只在需要时加载）"""
         if self.pipe is None:
-            print("\n正在加载模型（首次运行需要下载，请耐心等待）...")
-            self.pipe = StableDiffusionPipeline.from_pretrained(
+            from utils import load_model_with_fallback
+            self.pipe = load_model_with_fallback(
+                StableDiffusionPipeline,
                 self.model_name,
                 torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
                 safety_checker=None,

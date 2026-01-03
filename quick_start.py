@@ -337,8 +337,9 @@ def run_comprehensive():
         return
     
     try:
-        from 05_comprehensive_example import ComprehensiveAIGenerator
-        generator = ComprehensiveAIGenerator()
+        import importlib
+        module = importlib.import_module("05_comprehensive_example")
+        generator = module.ComprehensiveAIGenerator()
         
         # 运行基础功能演示
         generator.demo_text_to_image()
