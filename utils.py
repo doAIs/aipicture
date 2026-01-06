@@ -291,13 +291,71 @@ def get_video_info(video_path: str) -> dict:
     }
 
 
+def load_model_from_local_file(pipeline_class, model_path: str, **kwargs):
+    """
+    从本地文件加载模型（支持 .safetensors 或 .ckpt 文件）
+    
+    Args:
+        pipeline_class: Pipeline类（如 StableDiffusionPipeline）
+        model_path: 本地模型文件路径（.safetensors 或 .ckpt）或模型目录路径
+        **kwargs: 传递给from_pretrained或from_single_file的其他参数
+    
+    Returns:
+        加载的pipeline对象
+    
+    Raises:
+        FileNotFoundError: 如果模型文件不存在
+        ValueError: 如果文件格式不支持
+    """
+    import os
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"模型文件不存在: {model_path}")
+    
+    print(f"\n正在从本地文件加载模型: {model_path}")
+    
+    # 检查是否是单个文件（.safetensors 或 .ckpt）
+    if os.path.isfile(model_path):
+        file_ext = os.path.splitext(model_path)[1].lower()
+        
+        if file_ext in ['.safetensors', '.ckpt']:
+            # 使用 from_single_file 方法（diffusers 0.21.0+ 支持）
+            try:
+                print(f"检测到 {file_ext} 格式，使用 from_single_file 加载...")
+                pipe = pipeline_class.from_single_file(model_path, **kwargs)
+                print("✅ 从本地文件加载模型成功！")
+                return pipe
+            except AttributeError:
+                # 如果 diffusers 版本不支持 from_single_file，尝试其他方法
+                print("⚠️  当前 diffusers 版本不支持 from_single_file，尝试其他方法...")
+                raise ValueError(
+                    f"当前 diffusers 版本不支持从 {file_ext} 文件加载。"
+                    f"请升级 diffusers 到 0.21.0 或更高版本，或使用模型目录格式。"
+                )
+        else:
+            raise ValueError(f"不支持的文件格式: {file_ext}。支持格式: .safetensors, .ckpt")
+    
+    # 如果是目录，使用 from_pretrained
+    elif os.path.isdir(model_path):
+        print("检测到模型目录，使用 from_pretrained 加载...")
+        try:
+            pipe = pipeline_class.from_pretrained(model_path, **kwargs)
+            print("✅ 从本地目录加载模型成功！")
+            return pipe
+        except Exception as e:
+            raise OSError(f"从本地目录加载模型失败: {e}")
+    
+    else:
+        raise ValueError(f"无效的模型路径: {model_path}")
+
+
 def load_model_with_fallback(pipeline_class, model_name: str, **kwargs):
     """
     加载模型，带错误处理和离线模式支持
     
     Args:
         pipeline_class: Pipeline类（如 StableDiffusionPipeline）
-        model_name: 模型名称
+        model_name: 模型名称（HuggingFace ID）或本地路径
         **kwargs: 传递给from_pretrained的其他参数
     
     Returns:
@@ -307,6 +365,10 @@ def load_model_with_fallback(pipeline_class, model_name: str, **kwargs):
         OSError: 如果模型无法加载且没有本地缓存
     """
     import os
+    
+    # 检查是否是本地文件路径
+    if os.path.exists(model_name):
+        return load_model_from_local_file(pipeline_class, model_name, **kwargs)
     
     print(f"\n正在加载模型: {model_name}")
     print("（首次运行需要下载，请耐心等待）...")
@@ -370,6 +432,7 @@ def load_model_with_fallback(pipeline_class, model_name: str, **kwargs):
             print(f"   缓存目录: {cache_dir}")
             print("4. 设置环境变量启用离线模式（如果已有本地缓存）:")
             print("   set HF_HUB_LOCAL_FILES_ONLY=1")
+            print("5. 使用本地模型文件路径（支持 .safetensors 和 .ckpt 格式）")
             print("="*60)
             raise OSError(
                 f"无法加载模型 '{model_name}': 网络连接失败且本地无缓存。"
