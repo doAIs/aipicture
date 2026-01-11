@@ -81,7 +81,7 @@ if __name__ == "__main__":
     
     # 示例2: 使用本地模型文件生成图片
     # 请将下面的路径替换为您实际的模型文件路径
-    local_model_path = "E:/GIT_AI/modules/text_to_image/stable-diffusion-v1-5"
+    local_model_path = "F:\modules\sd"
     generate_image_from_text(prompt, "sunset_ocean_local", model_path=local_model_path)
     
     # 示例3: 生成另一张图片

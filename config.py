@@ -10,6 +10,15 @@ DEFAULT_IMAGE_MODEL = "runwayml/stable-diffusion-v1-5"  # 默认使用的图片�
 # "stabilityai/stable-diffusion-2-1"
 # "CompVis/stable-diffusion-v1-4"
 
+# 本地模型路径配置（优先使用本地模型）
+# 可以通过环境变量 LOCAL_MODEL_PATH 或直接修改此配置来设置本地模型路径
+LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH", "F:\\modules\\sd")  # 默认本地模型路径
+# 如果设置为 None 或空字符串，则不使用本地模型
+# 示例：
+# LOCAL_MODEL_PATH = "F:\\modules\\sd"  # Windows路径
+# LOCAL_MODEL_PATH = "/home/user/models/sd"  # Linux/Mac路径
+# LOCAL_MODEL_PATH = None  # 禁用本地模型，仅使用在线模型
+
 # 视频生成模型
 DEFAULT_VIDEO_MODEL = "damo-vilab/text-to-video-ms-1.7b"  # 默认视频生成模型
 # 其他可选模型：
