@@ -20,10 +20,19 @@ LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH", "F:\\modules\\sd")  # 默认本
 # LOCAL_MODEL_PATH = None  # 禁用本地模型，仅使用在线模型
 
 # 视频生成模型
-DEFAULT_VIDEO_MODEL = "damo-vilab/text-to-video-ms-1.7b"  # 默认视频生成模型
+DEFAULT_VIDEO_MODEL = "ali-vilab/text-to-video-ms-1.7b"  # 默认视频生成模型
 # 其他可选模型：
 # "cerspense/zeroscope-v2_576w"  # 高质量视频生成
 # "stabilityai/stable-video-diffusion-img2vid"
+
+# 本地视频模型路径配置（优先使用本地模型）
+# 可以通过环境变量 LOCAL_VIDEO_MODEL_PATH 或直接修改此配置来设置本地视频模型路径
+LOCAL_VIDEO_MODEL_PATH = os.getenv("LOCAL_VIDEO_MODEL_PATH", "F:\\modules\\text-to-video\\damo")  # 默认本地视频模型路径
+# 如果设置为 None 或空字符串，则不使用本地模型
+# 示例：
+# LOCAL_VIDEO_MODEL_PATH = "F:\\modules\\text-to-video\\damo"  # Windows路径
+# LOCAL_VIDEO_MODEL_PATH = "/home/user/models/text-to-video"  # Linux/Mac路径
+# LOCAL_VIDEO_MODEL_PATH = None  # 禁用本地模型，仅使用在线模型
 
 # 图像识别模型
 DEFAULT_IMAGE_RECOGNITION_MODEL = "google/vit-base-patch16-224"  # 图像分类模型

@@ -8,10 +8,11 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_video, get_device
+from utils import save_video, get_device, load_model_from_local_file, load_model_with_fallback
+from config import LOCAL_VIDEO_MODEL_PATH
 
 
-def generate_video_from_text(prompt: str, output_name: str = None, num_frames: int = 16, fps: int = 8):
+def generate_video_from_text(prompt: str, output_name: str = None, num_frames: int = 16, fps: int = 8, local_model_path: str = None):
     """
     根据文本描述生成视频
     
@@ -20,6 +21,10 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
         output_name: 输出文件名（可选）
         num_frames: 视频帧数（默认16帧）
         fps: 帧率（默认8fps）
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则从配置文件 config.LOCAL_VIDEO_MODEL_PATH 读取
+                         - 如果为 "" 或空字符串，则禁用本地模型，仅使用在线模型
+                         - 如果指定路径，则使用指定的路径
     """
     print(f"\n开始生成视频...")
     print(f"提示词: {prompt}")
@@ -28,9 +33,17 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
     # 获取设备
     device = get_device()
     
-    # 加载模型（首次运行会自动下载，需要一些时间）
-    print("\n正在加载模型（首次运行需要下载，请耐心等待）...")
-    print("注意：视频生成模型较大，下载可能需要较长时间")
+    # 确定本地模型路径的优先级
+    if local_model_path is not None:
+        model_path = local_model_path if local_model_path else None
+    else:
+        model_path = LOCAL_VIDEO_MODEL_PATH if LOCAL_VIDEO_MODEL_PATH else None
+    
+    # 加载模型（优先使用本地模型，如果不存在则使用在线模型）
+    if model_path:
+        print(f"\n本地模型路径: {model_path}")
+    else:
+        print("\n本地模型: 已禁用（仅使用在线模型）")
     
     # 根据设备选择数据类型
     if device == "cuda":
@@ -38,14 +51,56 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
     else:
         torch_dtype = torch.float32
     
+    # 准备模型加载参数
+    model_kwargs = {
+        "torch_dtype": torch_dtype,
+    }
+    
     # 使用文本生成视频模型
-    # 注意：这里使用一个较小的模型作为示例
+    # 优先尝试加载本地模型，如果不存在则使用在线模型
     try:
-        pipe = DiffusionPipeline.from_pretrained(
-            "damo-vilab/text-to-video-ms-1.7b",
-            torch_dtype=torch_dtype,
-        )
-        pipe = pipe.to(device)
+        # 优先尝试加载本地模型
+        if model_path and os.path.exists(model_path):
+            print(f"\n✅ 检测到本地模型路径: {model_path}")
+            print("   优先使用本地离线模型...")
+            try:
+                pipe = load_model_from_local_file(
+                    DiffusionPipeline,
+                    model_path,
+                    **model_kwargs
+                )
+                pipe = pipe.to(device)
+                print("✅ 本地模型加载成功！")
+            except Exception as e:
+                print(f"⚠️  本地模型加载失败: {e}")
+                print(f"   回退到在线模型: ali-vilab/text-to-video-ms-1.7b")
+                # 本地模型加载失败，回退到在线模型
+                pipe = load_model_with_fallback(
+                    DiffusionPipeline,
+                    "ali-vilab/text-to-video-ms-1.7b",
+                    **model_kwargs
+                )
+                pipe = pipe.to(device)
+        elif model_path:
+            # 本地模型路径已配置但不存在，直接使用在线模型
+            print(f"\n⚠️  本地模型路径不存在: {model_path}")
+            print(f"   使用在线模型: ali-vilab/text-to-video-ms-1.7b")
+            pipe = load_model_with_fallback(
+                DiffusionPipeline,
+                "ali-vilab/text-to-video-ms-1.7b",
+                **model_kwargs
+            )
+            pipe = pipe.to(device)
+        else:
+            # 本地模型未配置，直接使用在线模型
+            print(f"\n📡 使用在线模型: ali-vilab/text-to-video-ms-1.7b")
+            print("   注意：视频生成模型较大，下载可能需要较长时间")
+            pipe = load_model_with_fallback(
+                DiffusionPipeline,
+                "ali-vilab/text-to-video-ms-1.7b",
+                **model_kwargs
+            )
+            pipe = pipe.to(device)
         
         # 优化：启用内存高效注意力
         try:

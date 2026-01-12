@@ -1,5 +1,5 @@
 """
-下载 Stable Diffusion 文本生成图片模型
+下载文本生成视频模型
 使用优化的下载工具，支持进度显示、断点续传、错误重试等功能
 """
 
@@ -13,8 +13,8 @@ sys.path.insert(0, current_dir)
 from download_utils import download_model
 
 # 配置参数
-REPO_ID = "stable-diffusion-v1-5/stable-diffusion-v1-5"
-LOCAL_DIR = os.getenv("LOCAL_MODEL_PATH", "F:\\modules\\sd")
+REPO_ID = "ali-vilab/text-to-video-ms-1.7b"
+LOCAL_DIR = os.getenv("LOCAL_VIDEO_MODEL_PATH", "F:\\modules\\text-to-video\\damo")
 
 # 可选：只下载必要的文件（取消注释以启用）
 # ALLOW_PATTERNS = ["*.safetensors", "*.json", "tokenizer/*", "scheduler/*"]
