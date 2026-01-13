@@ -177,18 +177,47 @@ class AdvancedTextToVideo:
             )
             
             # 安全获取视频帧
+            # output.frames 的可能结构：
+            # 1. numpy.ndarray: shape=(1, num_frames, H, W, 3) - 最常见
+            # 2. List[List[Image]]: 批次列表
+            # 3. List[Image]: 直接的帧列表
+            
+            import numpy as np
+            
             if hasattr(result, 'frames'):
                 frames = result.frames
-                # 检查是否为嵌套列表（批次结构）
-                if isinstance(frames, list) and len(frames) > 0:
-                    if isinstance(frames[0], list):
-                        video_frames = frames[0]  # 取第一个批次
+                
+                # 情况1: numpy数组格式
+                if isinstance(frames, np.ndarray):
+                    print(f"检测到numpy数组格式，shape: {frames.shape}")
+                    if len(frames.shape) == 5:
+                        frames_batch = frames[0]
+                        from PIL import Image
+                        video_frames = []
+                        for i in range(frames_batch.shape[0]):
+                            frame_data = frames_batch[i]
+                            if frame_data.max() <= 1.0:
+                                frame_data = (frame_data * 255).astype(np.uint8)
+                            else:
+                                frame_data = frame_data.astype(np.uint8)
+                            img = Image.fromarray(frame_data)
+                            video_frames.append(img)
                     else:
-                        video_frames = frames  # 直接就是帧列表
+                        raise ValueError(f"意外的numpy数组形状: {frames.shape}")
+                
+                # 情况2: 列表格式
+                elif isinstance(frames, list) and len(frames) > 0:
+                    if isinstance(frames[0], list):
+                        video_frames = frames[0]
+                    else:
+                        video_frames = frames
+                
                 else:
-                    raise ValueError("模型输出的 frames 为空或格式不正确")
+                    raise ValueError(f"模型输出的 frames 格式不支持，类型: {type(frames)}")
+            
             elif hasattr(result, 'images'):
                 video_frames = result.images
+            
             else:
                 raise ValueError("无法从模型输出中获取视频帧")
         
