@@ -175,7 +175,22 @@ class AdvancedTextToVideo:
                 height=height,
                 width=width
             )
-            video_frames = result.frames
+            
+            # 安全获取视频帧
+            if hasattr(result, 'frames'):
+                frames = result.frames
+                # 检查是否为嵌套列表（批次结构）
+                if isinstance(frames, list) and len(frames) > 0:
+                    if isinstance(frames[0], list):
+                        video_frames = frames[0]  # 取第一个批次
+                    else:
+                        video_frames = frames  # 直接就是帧列表
+                else:
+                    raise ValueError("模型输出的 frames 为空或格式不正确")
+            elif hasattr(result, 'images'):
+                video_frames = result.images
+            else:
+                raise ValueError("无法从模型输出中获取视频帧")
         
         # 保存视频
         filepath = save_video(video_frames, output_name, "advanced_text_to_video", fps=fps)

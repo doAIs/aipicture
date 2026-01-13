@@ -14,13 +14,29 @@ from config.modules_config import LOCAL_VIDEO_MODEL_PATH
 
 def generate_video_from_text(prompt: str, output_name: str = None, num_frames: int = 16, fps: int = 8, local_model_path: str = None):
     """
+    视频时长(秒) = num_frames ÷ fps
     根据文本描述生成视频
     
     Args:
         prompt: 文本描述，例如 "a beautiful sunset over the ocean"
         output_name: 输出文件名（可选）
         num_frames: 视频帧数（默认16帧）
+        作用：生成的视频包含多少帧图像
+        默认值：16 帧
+         影响：🎬 决定视频素材量：帧数越多，视频内容越丰富
+         ⏱️ 影响生成时间：帧数越多，生成越慢
+         💾 影响内存占用：帧数越多，需要更多显存/内存
+         📏 与时长相关（见下方公式）
+
         fps: 帧率（默认8fps）
+        作用：Frames Per Second（每秒播放多少帧）
+             默认值：8 fps
+             影响：🎞️ 决定播放速度：fps 越高，视频越流畅
+             📏 与时长相关（见下方公式）
+             🎥 常见标准：8 fps：较慢，AI视频常用
+                        24 fps：电影标准
+                        30 fps：视频标准
+                        60 fps：高清流畅
         local_model_path: 本地模型路径（可选）
                          - 如果为 None，则从配置文件 config.LOCAL_VIDEO_MODEL_PATH 读取
                          - 如果为 "" 或空字符串，则禁用本地模型，仅使用在线模型
@@ -121,8 +137,45 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
                 num_inference_steps=50,
                 num_frames=num_frames
             )
-            # .frames 返回的是 List[List[Image]]，我们需要取第一个视频（下标 [0]）
-            video_frames = output.frames[0]
+            
+            # 安全获取视频帧
+            # output.frames 的结构可能是：
+            # - List[List[Image]]: 批次列表，每个批次包含一个视频的帧序列
+            # - List[Image]: 直接的帧列表
+            # - Tensor: 张量格式
+            
+            if hasattr(output, 'frames'):
+                frames = output.frames
+                # 检查是否为嵌套列表
+                if isinstance(frames, list) and len(frames) > 0:
+                    # 如果第一个元素也是列表，说明是批次结构
+                    if isinstance(frames[0], list):
+                        video_frames = frames[0]  # 取第一个批次
+                    else:
+                        video_frames = frames  # 直接就是帧列表
+                else:
+                    raise ValueError("模型输出的 frames 为空或格式不正确")
+            elif hasattr(output, 'images'):
+                # 某些模型可能使用 images 属性
+                video_frames = output.images
+            else:
+                raise ValueError("无法从模型输出中获取视频帧，输出类型: " + str(type(output)))
+        
+        # 调试信息：检查帧数据
+        print(f"\n生成了 {len(video_frames)} 帧")
+        if len(video_frames) > 0:
+            first_frame = video_frames[0]
+            print(f"帧类型: {type(first_frame)}")
+            if hasattr(first_frame, 'size'):
+                print(f"帧尺寸: {first_frame.size}")
+            if hasattr(first_frame, 'mode'):
+                print(f"帧模式: {first_frame.mode}")
+            # 转换为numpy检查数据范围
+            import numpy as np
+            frame_array = np.array(first_frame)
+            print(f"数据类型: {frame_array.dtype}")
+            print(f"数据范围: [{frame_array.min():.4f}, {frame_array.max():.4f}]")
+            print(f"数据形状: {frame_array.shape}")
         
         # 保存视频
         filepath = save_video(video_frames, output_name, "basic_text_to_video", fps=fps)

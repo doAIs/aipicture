@@ -94,14 +94,53 @@ def save_video(frames: List[Image.Image], filename: str = None, subfolder: str =
         filename = f"generated_{timestamp}"
     
     filepath = os.path.join(save_dir, f"{filename}.mp4")
-    
-    # 转换为numpy数组,
-    # frame_arrays = [np.array(frame) for frame in frames]
 
-    frame_arrays = [np.array(frame).astype(np.uint8) for frame in frames]
+    print(f"frames data: {frames}")
     
-    # 保存为视频
-    imageio.mimwrite(filepath, frame_arrays, fps=fps, codec='libx264', quality=8)
+    # 转换为numpy数组，确保数据格式正确
+    frame_arrays = []
+    for frame in frames:
+        # 确保是PIL Image对象
+        print(f"frame data: {frames}")
+        if isinstance(frame, Image.Image):
+            # 转换为RGB模式
+            if frame.mode != 'RGB':
+                frame = frame.convert('RGB')
+            # 转换为numpy数组，确保数据类型为uint8，范围在0-255
+            frame_array = np.array(frame)
+        else:
+            # 如果已经是numpy数组
+            frame_array = np.array(frame)
+        
+        # 确保数据类型正确
+        if frame_array.dtype != np.uint8:
+            # 如果是浮点数类型，需要转换为uint8
+            if np.issubdtype(frame_array.dtype, np.floating):
+                # 浮点数类型，检查范围
+                if frame_array.min() >= 0.0 and frame_array.max() <= 1.0 + 1e-5:  # 允许小的浮点误差
+                    # 0-1范围，转换为0-255
+                    frame_array = (np.clip(frame_array, 0, 1) * 255).astype(np.uint8)
+                else:
+                    # 其他范围，直接裁剪到0-255
+                    frame_array = np.clip(frame_array, 0, 255).astype(np.uint8)
+            else:
+                # 整数类型，直接转换
+                frame_array = np.clip(frame_array, 0, 255).astype(np.uint8)
+        
+        frame_arrays.append(frame_array)
+    
+    # 保存为视频，使用更高质量的设置
+    # quality参数：对于H.264，值越小质量越高（0最好），推荐使用5-10
+    # 添加像素格式参数确保兼容性
+    imageio.mimwrite(
+        filepath, 
+        frame_arrays, 
+        fps=fps, 
+        codec='libx264',
+        quality=5,  # 提高视频质量（0-10，值越小质量越高）
+        pixelformat='yuv420p',  # 添加像素格式，提高兼容性
+        macro_block_size=1  # 避免尺寸问题
+    )
     print(f"视频已保存到: {filepath}")
     return filepath
 
@@ -181,8 +220,47 @@ def frames_to_video(frames: List[Image.Image], output_path: str, fps: int = 8) -
     
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
     
-    frame_arrays = [np.array(frame) for frame in frames]
-    imageio.mimwrite(output_path, frame_arrays, fps=fps, codec='libx264', quality=8)
+    # 转换为numpy数组，确保数据格式正确
+    frame_arrays = []
+    for frame in frames:
+        # 确保是PIL Image对象
+        if isinstance(frame, Image.Image):
+            # 转换为RGB模式
+            if frame.mode != 'RGB':
+                frame = frame.convert('RGB')
+            # 转换为numpy数组
+            frame_array = np.array(frame)
+        else:
+            # 如果已经是numpy数组
+            frame_array = np.array(frame)
+        
+        # 确保数据类型正确
+        if frame_array.dtype != np.uint8:
+            # 如果是浮点数类型，需要转换为uint8
+            if np.issubdtype(frame_array.dtype, np.floating):
+                # 浮点数类型，检查范围
+                if frame_array.min() >= 0.0 and frame_array.max() <= 1.0 + 1e-5:  # 允许小的浮点误差
+                    # 0-1范围，转换为0-255
+                    frame_array = (np.clip(frame_array, 0, 1) * 255).astype(np.uint8)
+                else:
+                    # 其他范围，直接裁剪到0-255
+                    frame_array = np.clip(frame_array, 0, 255).astype(np.uint8)
+            else:
+                # 整数类型，直接转换
+                frame_array = np.clip(frame_array, 0, 255).astype(np.uint8)
+        
+        frame_arrays.append(frame_array)
+    
+    # 保存为视频，使用高质量设置
+    imageio.mimwrite(
+        output_path, 
+        frame_arrays, 
+        fps=fps, 
+        codec='libx264', 
+        quality=5,
+        pixelformat='yuv420p',
+        macro_block_size=1
+    )
     print(f"视频已保存到: {output_path}")
     return output_path
 
