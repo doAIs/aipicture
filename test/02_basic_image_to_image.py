@@ -6,7 +6,7 @@
 from diffusers import StableDiffusionImg2ImgPipeline
 import torch
 from PIL import Image
-from utils import save_image, load_image, get_device
+from utils.modules_utils import save_image, load_image, get_device
 
 
 def generate_image_from_image(

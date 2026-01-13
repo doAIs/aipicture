@@ -9,7 +9,7 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_image, load_image, get_device
+from utils.modules_utils import save_image, load_image, get_device
 
 
 def generate_image_from_image(

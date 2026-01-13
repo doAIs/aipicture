@@ -8,8 +8,8 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_video, get_device, set_seed, load_model_from_local_file, load_model_with_fallback
-from config import DEFAULT_VIDEO_STEPS, DEFAULT_VIDEO_FRAMES, DEFAULT_VIDEO_FPS, DEFAULT_VIDEO_HEIGHT, DEFAULT_VIDEO_WIDTH, DEFAULT_SEED, LOCAL_VIDEO_MODEL_PATH
+from utils.modules_utils import save_video, get_device, set_seed, load_model_from_local_file, load_model_with_fallback
+from config.modules_config import DEFAULT_VIDEO_STEPS, DEFAULT_VIDEO_FRAMES, DEFAULT_VIDEO_FPS, DEFAULT_VIDEO_HEIGHT, DEFAULT_VIDEO_WIDTH, DEFAULT_SEED, LOCAL_VIDEO_MODEL_PATH
 
 
 class AdvancedTextToVideo:

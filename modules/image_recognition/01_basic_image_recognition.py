@@ -8,7 +8,7 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import load_image, get_device
+from utils.modules_utils import load_image, get_device
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 import torch.nn.functional as F
 

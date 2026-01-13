@@ -5,7 +5,7 @@
 
 from diffusers import StableDiffusionPipeline
 import torch
-from utils import save_image, get_device
+from utils.modules_utils import save_image, get_device
 
 
 def generate_image_from_text(prompt: str, output_name: str = None):

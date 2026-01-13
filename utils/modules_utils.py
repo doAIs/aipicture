@@ -7,6 +7,7 @@ from PIL import Image
 import torch
 import numpy as np
 from typing import List, Tuple, Optional
+from config.modules_config import OUTPUT_IMAGES_DIR
 
 
 def save_image(image: Image.Image, filename: str = None, subfolder: str = None) -> str:
@@ -21,7 +22,7 @@ def save_image(image: Image.Image, filename: str = None, subfolder: str = None) 
     Returns:
         保存的文件路径
     """
-    from config import OUTPUT_IMAGES_DIR
+
     
     # 创建子文件夹
     if subfolder:
@@ -77,7 +78,7 @@ def save_video(frames: List[Image.Image], filename: str = None, subfolder: str =
     except ImportError:
         raise ImportError("请安装 imageio 和 imageio-ffmpeg: pip install imageio imageio-ffmpeg")
     
-    from config import OUTPUT_VIDEOS_DIR
+    from config.modules_config import OUTPUT_VIDEOS_DIR
     
     # 创建子文件夹
     if subfolder:
@@ -94,8 +95,10 @@ def save_video(frames: List[Image.Image], filename: str = None, subfolder: str =
     
     filepath = os.path.join(save_dir, f"{filename}.mp4")
     
-    # 转换为numpy数组
-    frame_arrays = [np.array(frame) for frame in frames]
+    # 转换为numpy数组,
+    # frame_arrays = [np.array(frame) for frame in frames]
+
+    frame_arrays = [np.array(frame).astype(np.uint8) for frame in frames]
     
     # 保存为视频
     imageio.mimwrite(filepath, frame_arrays, fps=fps, codec='libx264', quality=8)

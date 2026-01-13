@@ -5,8 +5,8 @@
 
 from diffusers import StableDiffusionPipeline
 import torch
-from utils import save_image, get_device, set_seed
-from config import (
+from utils.modules_utils import save_image, get_device, set_seed
+from config.modules_config import (
     DEFAULT_STEPS,
     DEFAULT_GUIDANCE_SCALE,
     DEFAULT_HEIGHT,

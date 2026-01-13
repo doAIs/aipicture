@@ -6,7 +6,7 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import load_video, get_device, get_video_info
+from utils.modules_utils import load_video, get_device, get_video_info
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 import torch
 import torch.nn.functional as F

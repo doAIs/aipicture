@@ -9,7 +9,7 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_video, load_image, get_device, resize_image
+from utils.modules_utils import save_video, load_image, get_device, resize_image
 
 
 def generate_video_from_image(

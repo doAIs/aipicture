@@ -8,7 +8,7 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_image, get_device, load_model_with_fallback, load_model_from_local_file
+from utils.modules_utils import save_image, get_device, load_model_with_fallback, load_model_from_local_file
 
 
 def generate_image_from_text(prompt: str, output_name: str = None, model_path: str = None):

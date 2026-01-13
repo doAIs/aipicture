@@ -8,8 +8,8 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_video, get_device, load_model_from_local_file, load_model_with_fallback
-from config import LOCAL_VIDEO_MODEL_PATH
+from utils.modules_utils import save_video, get_device, load_model_from_local_file, load_model_with_fallback
+from config.modules_config import LOCAL_VIDEO_MODEL_PATH
 
 
 def generate_video_from_text(prompt: str, output_name: str = None, num_frames: int = 16, fps: int = 8, local_model_path: str = None):
@@ -114,13 +114,15 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
         # 生成视频
         print(f"\n正在生成视频（这可能需要几分钟）...")
         print("视频生成比图片生成慢得多，请耐心等待...")
-        
+
         with torch.no_grad():
-            video_frames = pipe(
+            output = pipe(
                 prompt,
                 num_inference_steps=50,
                 num_frames=num_frames
-            ).frames
+            )
+            # .frames 返回的是 List[List[Image]]，我们需要取第一个视频（下标 [0]）
+            video_frames = output.frames[0]
         
         # 保存视频
         filepath = save_video(video_frames, output_name, "basic_text_to_video", fps=fps)

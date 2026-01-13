@@ -8,7 +8,7 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import load_video, save_video, get_device, resize_image
+from utils.modules_utils import load_video, save_video, get_device, resize_image
 
 
 def generate_video_from_video(

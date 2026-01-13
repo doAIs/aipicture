@@ -9,8 +9,8 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils import save_image, load_image, get_device, set_seed
-from config import DEFAULT_STEPS, DEFAULT_GUIDANCE_SCALE, DEFAULT_SEED
+from utils.modules_utils import save_image, load_image, get_device, set_seed
+from config.modules_config import DEFAULT_STEPS, DEFAULT_GUIDANCE_SCALE, DEFAULT_SEED
 
 
 class AdvancedImageToImage:

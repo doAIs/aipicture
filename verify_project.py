@@ -51,8 +51,8 @@ def main():
         ("USAGE_GUIDE.md", "使用指南"),
         ("PROJECT_SUMMARY.md", "项目总结"),
         ("requirements.txt", "依赖文件"),
-        ("config.py", "配置文件"),
-        ("utils.py", "工具函数"),
+        ("modules_config.py", "配置文件"),
+        ("modules_utils.py", "工具函数"),
     ]
     
     for filepath, desc in files_to_check:

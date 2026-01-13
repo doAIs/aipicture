@@ -245,8 +245,8 @@ def main():
     generator = ComprehensiveAIGenerator()
     
     # 检查示例文件
-    examples_images_dir = "examples/images"
-    examples_videos_dir = "examples/videos"
+    examples_images_dir = "../examples/images"
+    examples_videos_dir = "../examples/videos"
     
     image_files = []
     video_files = []

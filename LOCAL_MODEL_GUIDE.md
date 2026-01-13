@@ -32,7 +32,7 @@ generate_image_from_text(
 
 ```python
 from diffusers import StableDiffusionPipeline
-from utils import load_model_from_local_file
+from utils.modules_utils import load_model_from_local_file
 import torch
 
 # 加载本地模型
@@ -53,7 +53,7 @@ image = pipe("a beautiful sunset").images[0]
 您也可以修改 `config.py` 中的 `DEFAULT_IMAGE_MODEL` 为本地路径：
 
 ```python
-# 在 config.py 中
+# 在 modules_config.py 中
 DEFAULT_IMAGE_MODEL = "E:/models/v1-5-pruned.safetensors"
 ```
 
@@ -138,7 +138,7 @@ generate_image_from_text(
 
 ```python
 from diffusers import StableDiffusionPipeline
-from utils import load_model_from_local_file
+from utils.modules_utils import load_model_from_local_file
 import torch
 
 # 加载本地模型
@@ -159,7 +159,7 @@ image = pipe("a beautiful sunset").images[0]
 您也可以修改 `config.py` 中的 `DEFAULT_IMAGE_MODEL` 为本地路径：
 
 ```python
-# 在 config.py 中
+# 在 modules_config.py 中
 DEFAULT_IMAGE_MODEL = "E:/models/v1-5-pruned.safetensors"
 ```
 
