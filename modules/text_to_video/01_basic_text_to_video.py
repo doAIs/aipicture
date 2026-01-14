@@ -2,7 +2,7 @@
 基础示例: 文本生成视频（最简单版本）
 这是最基础的文本生成视频示例，适合初学者理解基本流程
 """
-import datetime
+from datetime import datetime
 
 from diffusers import DiffusionPipeline
 import torch
@@ -148,7 +148,7 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
             save_dir = os.path.join(OUTPUT_VIDEOS_DIR, "basic_text_to_video")
             filepath = os.path.join(save_dir, f"{filename}.mp4")
             os.makedirs(save_dir, exist_ok=True)
-            video_path = export_to_video(video_frames=output.frames,output_video_path=filepath ,quality=5,fps=fps)
+            video_path = export_to_video(video_frames=output.frames[0],output_video_path=filepath ,quality=5,fps=fps)
             print(f"================视频保存路径: {video_path}")
             
             # 安全获取视频帧
@@ -161,6 +161,7 @@ def generate_video_from_text(prompt: str, output_name: str = None, num_frames: i
             
             if hasattr(output, 'frames'):
                 frames = output.frames
+
                 
                 # 情况1: numpy数组格式 (shape: [batch, num_frames, H, W, C])
                 if isinstance(frames, np.ndarray):
