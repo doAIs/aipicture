@@ -27,4 +27,6 @@ requests>=2.31.0
 
 # 可选：用于更好的性能
 # xformers  # 需要根据CUDA版本安装，注释掉避免安装问题
+huggingface-hub==0.36
 
+modelscope

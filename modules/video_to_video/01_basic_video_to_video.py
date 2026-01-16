@@ -8,7 +8,11 @@ import torch
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils.modules_utils import load_video, save_video, get_device, resize_image
+from utils.modules_utils import (
+    load_video, save_video, get_device, resize_image,
+    load_diffusion_pipeline_with_fallback
+)
+from config.modules_config import LOCAL_VIDEO_TO_VIDEO_MODEL_PATH
 
 
 def generate_video_from_video(
@@ -17,7 +21,8 @@ def generate_video_from_video(
     output_name: str = None,
     strength: float = 0.75,
     num_frames: int = None,
-    fps: int = 8
+    fps: int = 8,
+    local_model_path: str = None
 ):
     """
     根据视频和文本描述生成新视频
@@ -30,6 +35,10 @@ def generate_video_from_video(
         strength: 修改强度 (0.0-1.0)，值越大变化越大
         num_frames: 处理的帧数（None表示处理所有帧）
         fps: 输出视频帧率
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则从配置文件读取
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则使用指定的路径
     """
     print(f"\n开始根据视频生成新视频...")
     print(f"输入视频: {video_path}")
@@ -61,8 +70,18 @@ def generate_video_from_video(
         if (i + 1) % 10 == 0:
             print(f"已处理 {i + 1}/{len(frames)} 帧")
     
-    # 加载模型
-    print("\n正在加载模型（首次运行需要下载，请耐心等待）...")
+    # 确定本地模型路径的优先级
+    if local_model_path is not None:
+        model_path = local_model_path if local_model_path else None
+    else:
+        model_path = LOCAL_VIDEO_TO_VIDEO_MODEL_PATH if LOCAL_VIDEO_TO_VIDEO_MODEL_PATH else None
+    
+    # 加载模型（优先使用本地模型）
+    print("\n正在加载模型...")
+    if model_path:
+        print(f"本地模型路径: {model_path}")
+    else:
+        print("本地模型: 已禁用（仅使用在线模型）")
     
     # 根据设备选择数据类型
     if device == "cuda":
@@ -70,11 +89,18 @@ def generate_video_from_video(
     else:
         torch_dtype = torch.float32
     
-    pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+    # 准备模型加载参数
+    model_kwargs = {
+        "torch_dtype": torch_dtype,
+        "safety_checker": None,
+        "requires_safety_checker": False
+    }
+    
+    pipe = load_diffusion_pipeline_with_fallback(
+        StableDiffusionImg2ImgPipeline,
         "runwayml/stable-diffusion-v1-5",
-        torch_dtype=torch_dtype,
-        safety_checker=None,
-        requires_safety_checker=False
+        model_path,
+        **model_kwargs
     )
     pipe = pipe.to(device)
     

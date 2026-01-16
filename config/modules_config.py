@@ -38,6 +38,46 @@ LOCAL_VIDEO_MODEL_PATH = os.getenv("LOCAL_VIDEO_MODEL_PATH", "F:\\modules\\text-
 DEFAULT_IMAGE_RECOGNITION_MODEL = "google/vit-base-patch16-224"  # 图像分类模型
 DEFAULT_OBJECT_DETECTION_MODEL = "yolov8n.pt"  # 目标检测模型（YOLOv8）
 
+# ==================== 本地模型路径配置（按模块） ====================
+# 图像识别模型本地路径
+# 支持 Hugging Face 格式的模型目录（如 ViT, ResNet 等）
+LOCAL_IMAGE_RECOGNITION_MODEL_PATH = os.getenv(
+    "LOCAL_IMAGE_RECOGNITION_MODEL_PATH", 
+    "F:\\modules\\google\\vit-base-patch16-224"
+)
+# 如果设置为 None 或空字符串，则不使用本地模型
+
+# 目标检测模型本地路径（YOLO）
+# 支持 .pt 文件或模型目录
+LOCAL_OBJECT_DETECTION_MODEL_PATH = os.getenv(
+    "LOCAL_OBJECT_DETECTION_MODEL_PATH", 
+    "F:\\modules\\object-detection\\yolov8n.pt"
+)
+# 示例路径：
+# LOCAL_OBJECT_DETECTION_MODEL_PATH = "F:\\modules\\yolov8n.pt"  # Windows
+# LOCAL_OBJECT_DETECTION_MODEL_PATH = "/home/user/models/yolov8n.pt"  # Linux
+
+# 图片生成图片模型本地路径（Img2Img）
+LOCAL_IMAGE_TO_IMAGE_MODEL_PATH = os.getenv(
+    "LOCAL_IMAGE_TO_IMAGE_MODEL_PATH", 
+    "F:\\modules\\stable-diffusion\\sd-v1-5"
+)
+# 支持 .safetensors, .ckpt 文件或 Hugging Face 格式目录
+
+# 图片生成视频模型本地路径（SVD）
+LOCAL_IMAGE_TO_VIDEO_MODEL_PATH = os.getenv(
+    "LOCAL_IMAGE_TO_VIDEO_MODEL_PATH", 
+    "F:\\modules\\stable-video-diffusion\\svd-img2vid"
+)
+# 支持 .safetensors, .ckpt 文件或 Hugging Face 格式目录
+
+# 视频生成视频模型本地路径（Video2Video）
+LOCAL_VIDEO_TO_VIDEO_MODEL_PATH = os.getenv(
+    "LOCAL_VIDEO_TO_VIDEO_MODEL_PATH", 
+    "F:\\modules\\stable-diffusion\\sd-v1-5"
+)
+# 通常与 Image-to-Image 使用相同的模型（逐帧处理）
+
 # ==================== 生成参数默认值 ====================
 # 图片生成参数
 DEFAULT_STEPS = 50  # 推理步数（越多质量越好但越慢）

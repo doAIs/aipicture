@@ -9,14 +9,19 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils.modules_utils import save_image, load_image, get_device
+from utils.modules_utils import (
+    save_image, load_image, get_device,
+    load_diffusion_pipeline_with_fallback
+)
+from config.modules_config import LOCAL_IMAGE_TO_IMAGE_MODEL_PATH
 
 
 def generate_image_from_image(
     image_path: str,
     prompt: str,
     strength: float = 0.75,
-    output_name: str = None
+    output_name: str = None,
+    local_model_path: str = None
 ):
     """
     根据图片和文本描述生成新图片
@@ -26,6 +31,10 @@ def generate_image_from_image(
         prompt: 文本描述，说明想要如何修改图片
         strength: 修改强度 (0.0-1.0)，值越大变化越大
         output_name: 输出文件名（可选）
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则从配置文件读取
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则使用指定的路径
     """
     print(f"\n开始根据图片生成新图片...")
     print(f"输入图片: {image_path}")
@@ -42,8 +51,18 @@ def generate_image_from_image(
     # 调整图片大小（模型要求512x512或类似尺寸）
     init_image = init_image.resize((512, 512))
     
-    # 加载模型
-    print("\n正在加载模型（首次运行需要下载，请耐心等待）...")
+    # 确定本地模型路径的优先级
+    if local_model_path is not None:
+        model_path = local_model_path if local_model_path else None
+    else:
+        model_path = LOCAL_IMAGE_TO_IMAGE_MODEL_PATH if LOCAL_IMAGE_TO_IMAGE_MODEL_PATH else None
+    
+    # 加载模型（优先使用本地模型）
+    print("\n正在加载模型...")
+    if model_path:
+        print(f"本地模型路径: {model_path}")
+    else:
+        print("本地模型: 已禁用（仅使用在线模型）")
     
     # 根据设备选择数据类型
     if device == "cuda":
@@ -51,11 +70,18 @@ def generate_image_from_image(
     else:
         torch_dtype = torch.float32
     
-    pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+    # 准备模型加载参数
+    model_kwargs = {
+        "torch_dtype": torch_dtype,
+        "safety_checker": None,
+        "requires_safety_checker": False
+    }
+    
+    pipe = load_diffusion_pipeline_with_fallback(
+        StableDiffusionImg2ImgPipeline,
         "runwayml/stable-diffusion-v1-5",
-        torch_dtype=torch_dtype,
-        safety_checker=None,
-        requires_safety_checker=False
+        model_path,
+        **model_kwargs
     )
     pipe = pipe.to(device)
     

@@ -525,3 +525,206 @@ def load_model_with_fallback(pipeline_class, model_name: str, **kwargs):
         if "网络" not in str(e) and "connection" not in str(e).lower():
             print(f"\n❌ 模型加载失败: {e}")
         raise
+
+
+def load_transformers_model_with_fallback(
+    processor_class,
+    model_class,
+    model_name: str,
+    local_model_path: str = None,
+    **kwargs
+):
+    """
+    加载 Transformers 模型（如 ViT），优先使用本地模型
+    
+    Args:
+        processor_class: 处理器类（如 AutoImageProcessor）
+        model_class: 模型类（如 AutoModelForImageClassification）
+        model_name: 在线模型名称（HuggingFace ID）
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则不使用本地模型
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则优先使用本地模型
+        **kwargs: 传递给 from_pretrained 的其他参数
+    
+    Returns:
+        (processor, model) 元组
+    """
+    import os
+    
+    processor = None
+    model = None
+    loaded_from_local = False
+    
+    # 确定本地模型路径
+    effective_local_path = local_model_path if local_model_path else None
+    
+    # 优先尝试加载本地模型
+    if effective_local_path and os.path.exists(effective_local_path):
+        print(f"\n✅ 检测到本地模型路径: {effective_local_path}")
+        print("   优先使用本地离线模型...")
+        try:
+            processor = processor_class.from_pretrained(effective_local_path, **kwargs)
+            model = model_class.from_pretrained(effective_local_path, **kwargs)
+            print("✅ 本地模型加载成功！")
+            loaded_from_local = True
+        except Exception as e:
+            print(f"⚠️  本地模型加载失败: {e}")
+            print(f"   回退到在线模型: {model_name}")
+    elif effective_local_path:
+        print(f"\n⚠️  本地模型路径不存在: {effective_local_path}")
+        print(f"   使用在线模型: {model_name}")
+    else:
+        print(f"\n📡 使用在线模型: {model_name}")
+    
+    # 如果本地模型加载失败或未配置，使用在线模型
+    if not loaded_from_local:
+        print("（首次运行需要下载，请耐心等待）...")
+        
+        # 检查是否启用离线模式
+        offline_mode = os.getenv("HF_HUB_OFFLINE", "0") == "1"
+        local_files_only = os.getenv("HF_HUB_LOCAL_FILES_ONLY", "0") == "1"
+        
+        if offline_mode or local_files_only:
+            print("⚠️  离线模式：仅使用本地缓存的模型")
+            kwargs["local_files_only"] = True
+        
+        try:
+            processor = processor_class.from_pretrained(model_name, **kwargs)
+            model = model_class.from_pretrained(model_name, **kwargs)
+            print("✅ 模型加载成功！")
+        except Exception as e:
+            error_str = str(e).lower()
+            is_network_error = any(keyword in error_str for keyword in [
+                'timeout', 'connection', 'connect', 'network', 
+                'max retries', 'connection pool', 'huggingface.co'
+            ])
+            
+            if is_network_error:
+                # 尝试使用本地缓存
+                print("\n⚠️  网络连接失败，尝试使用本地缓存的模型...")
+                try:
+                    kwargs["local_files_only"] = True
+                    processor = processor_class.from_pretrained(model_name, **kwargs)
+                    model = model_class.from_pretrained(model_name, **kwargs)
+                    print("✅ 从本地缓存加载模型成功！")
+                except Exception as cache_error:
+                    print(f"❌ 本地缓存加载失败: {cache_error}")
+                    raise OSError(
+                        f"无法加载模型 '{model_name}': 网络连接失败且本地无缓存。"
+                        f"请检查网络连接或配置本地模型路径。"
+                    ) from e
+            else:
+                raise
+    
+    return processor, model
+
+
+def load_yolo_model_with_fallback(
+    model_name: str = "yolov8n.pt",
+    local_model_path: str = None
+):
+    """
+    加载 YOLO 模型，优先使用本地模型
+    
+    Args:
+        model_name: 在线模型名称（默认 yolov8n.pt）
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则不使用本地模型
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则优先使用本地模型
+    
+    Returns:
+        YOLO 模型对象
+    """
+    import os
+    
+    try:
+        from ultralytics import YOLO
+    except ImportError:
+        raise ImportError("请安装 ultralytics: pip install ultralytics")
+    
+    model = None
+    effective_local_path = local_model_path if local_model_path else None
+    
+    # 优先尝试加载本地模型
+    if effective_local_path and os.path.exists(effective_local_path):
+        print(f"\n✅ 检测到本地YOLO模型路径: {effective_local_path}")
+        print("   优先使用本地离线模型...")
+        try:
+            model = YOLO(effective_local_path)
+            print("✅ 本地YOLO模型加载成功！")
+            return model
+        except Exception as e:
+            print(f"⚠️  本地YOLO模型加载失败: {e}")
+            print(f"   回退到在线模型: {model_name}")
+    elif effective_local_path:
+        print(f"\n⚠️  本地YOLO模型路径不存在: {effective_local_path}")
+        print(f"   使用在线模型: {model_name}")
+    else:
+        print(f"\n📡 使用在线模型: {model_name}")
+    
+    # 使用在线模型
+    print("（首次运行需要下载，请耐心等待）...")
+    try:
+        model = YOLO(model_name)
+        print("✅ YOLO模型加载成功！")
+        return model
+    except Exception as e:
+        print(f"\n❌ YOLO模型加载失败: {e}")
+        print("\n提示：")
+        print("1. 检查网络连接")
+        print("2. 配置本地模型路径以避免网络下载")
+        raise
+
+
+def load_diffusion_pipeline_with_fallback(
+    pipeline_class,
+    model_name: str,
+    local_model_path: str = None,
+    **kwargs
+):
+    """
+    加载 Diffusers Pipeline，优先使用本地模型
+    
+    Args:
+        pipeline_class: Pipeline类（如 StableDiffusionImg2ImgPipeline）
+        model_name: 在线模型名称（HuggingFace ID）
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则不使用本地模型
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则优先使用本地模型
+        **kwargs: 传递给 from_pretrained 的其他参数
+    
+    Returns:
+        加载的 pipeline 对象
+    """
+    import os
+    
+    pipe = None
+    loaded_from_local = False
+    effective_local_path = local_model_path if local_model_path else None
+    
+    # 优先尝试加载本地模型
+    if effective_local_path and os.path.exists(effective_local_path):
+        print(f"\n✅ 检测到本地模型路径: {effective_local_path}")
+        print("   优先使用本地离线模型...")
+        try:
+            pipe = load_model_from_local_file(pipeline_class, effective_local_path, **kwargs)
+            print("✅ 本地模型加载成功！")
+            loaded_from_local = True
+        except Exception as e:
+            print(f"⚠️  本地模型加载失败: {e}")
+            print(f"   回退到在线模型: {model_name}")
+    elif effective_local_path:
+        print(f"\n⚠️  本地模型路径不存在: {effective_local_path}")
+        print(f"   使用在线模型: {model_name}")
+    else:
+        print(f"\n📡 使用在线模型: {model_name}")
+        print("   注意：模型可能较大，下载可能需要较长时间")
+    
+    # 如果本地模型加载失败或未配置，使用在线模型
+    if not loaded_from_local:
+        pipe = load_model_with_fallback(pipeline_class, model_name, **kwargs)
+    
+    return pipe

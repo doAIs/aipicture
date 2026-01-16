@@ -6,15 +6,30 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils.modules_utils import load_video, get_device, get_video_info
+from utils.modules_utils import (
+    load_video, get_device, get_video_info,
+    load_transformers_model_with_fallback,
+    load_yolo_model_with_fallback
+)
 from transformers import AutoImageProcessor, AutoModelForImageClassification
+from config.modules_config import (
+    DEFAULT_IMAGE_RECOGNITION_MODEL,
+    DEFAULT_OBJECT_DETECTION_MODEL,
+    LOCAL_IMAGE_RECOGNITION_MODEL_PATH,
+    LOCAL_OBJECT_DETECTION_MODEL_PATH
+)
 import torch
 import torch.nn.functional as F
 from typing import List, Dict
 from collections import Counter
 
 
-def classify_video(video_path: str, sample_frames: int = 10, top_k: int = 5):
+def classify_video(
+    video_path: str, 
+    sample_frames: int = 10, 
+    top_k: int = 5,
+    local_model_path: str = None
+):
     """
     对视频进行分类识别
     通过采样帧进行识别，然后汇总结果
@@ -23,6 +38,10 @@ def classify_video(video_path: str, sample_frames: int = 10, top_k: int = 5):
         video_path: 视频路径
         sample_frames: 采样帧数
         top_k: 返回前k个最可能的类别
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则从配置文件读取
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则使用指定的路径
     
     Returns:
         分类结果列表
@@ -51,11 +70,25 @@ def classify_video(video_path: str, sample_frames: int = 10, top_k: int = 5):
     
     print(f"采样 {len(sampled_frames)} 帧进行分析")
     
-    # 加载模型
-    print("\n正在加载分类模型（首次运行需要下载，请耐心等待）...")
-    model_name = "google/vit-base-patch16-224"
-    processor = AutoImageProcessor.from_pretrained(model_name)
-    model = AutoModelForImageClassification.from_pretrained(model_name)
+    # 确定本地模型路径的优先级
+    if local_model_path is not None:
+        model_path = local_model_path if local_model_path else None
+    else:
+        model_path = LOCAL_IMAGE_RECOGNITION_MODEL_PATH if LOCAL_IMAGE_RECOGNITION_MODEL_PATH else None
+    
+    # 加载模型（优先使用本地模型）
+    print("\n正在加载分类模型...")
+    if model_path:
+        print(f"本地模型路径: {model_path}")
+    else:
+        print("本地模型: 已禁用（仅使用在线模型）")
+    
+    processor, model = load_transformers_model_with_fallback(
+        AutoImageProcessor,
+        AutoModelForImageClassification,
+        DEFAULT_IMAGE_RECOGNITION_MODEL,
+        model_path
+    )
     model = model.to(device)
     model.eval()
     print("模型加载完成！")
@@ -116,7 +149,8 @@ def classify_video(video_path: str, sample_frames: int = 10, top_k: int = 5):
 def detect_objects_in_video(
     video_path: str,
     sample_frames: int = 10,
-    confidence_threshold: float = 0.5
+    confidence_threshold: float = 0.5,
+    local_model_path: str = None
 ):
     """
     对视频进行目标检测
@@ -126,15 +160,14 @@ def detect_objects_in_video(
         video_path: 视频路径
         sample_frames: 采样帧数
         confidence_threshold: 置信度阈值
+        local_model_path: 本地YOLO模型路径（可选）
+                         - 如果为 None，则从配置文件读取
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则使用指定的路径
     
     Returns:
         检测结果字典
     """
-    try:
-        from ultralytics import YOLO
-    except ImportError:
-        raise ImportError("请安装 ultralytics: pip install ultralytics")
-    
     print(f"\n开始检测视频中的物体...")
     print(f"视频路径: {video_path}")
     print(f"置信度阈值: {confidence_threshold}")
@@ -161,9 +194,23 @@ def detect_objects_in_video(
     
     print(f"采样 {len(sampled_frames)} 帧进行分析")
     
-    # 加载模型
-    print("\n正在加载检测模型（首次运行需要下载，请耐心等待）...")
-    model = YOLO("yolov8n.pt")
+    # 确定本地模型路径的优先级
+    if local_model_path is not None:
+        model_path = local_model_path if local_model_path else None
+    else:
+        model_path = LOCAL_OBJECT_DETECTION_MODEL_PATH if LOCAL_OBJECT_DETECTION_MODEL_PATH else None
+    
+    # 加载模型（优先使用本地模型）
+    print("\n正在加载检测模型...")
+    if model_path:
+        print(f"本地模型路径: {model_path}")
+    else:
+        print("本地模型: 已禁用（仅使用在线模型）")
+    
+    model = load_yolo_model_with_fallback(
+        DEFAULT_OBJECT_DETECTION_MODEL,
+        model_path
+    )
     print("模型加载完成！")
     
     # 对每帧进行检测

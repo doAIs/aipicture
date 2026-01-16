@@ -6,11 +6,13 @@
 import os
 import sys
 
-from utils.download_utils import download_model
-
-# 添加当前目录到路径，以便导入工具模块
+# 添加项目根目录到路径，以便导入 utils 等模块
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
+project_root = os.path.dirname(current_dir)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from utils.download_utils import download_model
 
 # 配置参数
 REPO_ID = "ali-vilab/text-to-video-ms-1.7b"

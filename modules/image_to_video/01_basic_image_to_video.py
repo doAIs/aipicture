@@ -9,7 +9,11 @@ from PIL import Image
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from utils.modules_utils import save_video, load_image, get_device, resize_image
+from utils.modules_utils import (
+    save_video, load_image, get_device, resize_image,
+    load_diffusion_pipeline_with_fallback
+)
+from config.modules_config import LOCAL_IMAGE_TO_VIDEO_MODEL_PATH
 
 
 def generate_video_from_image(
@@ -18,7 +22,8 @@ def generate_video_from_image(
     output_name: str = None,
     num_frames: int = 14,
     fps: int = 7,
-    motion_bucket_id: int = 127
+    motion_bucket_id: int = 127,
+    local_model_path: str = None
 ):
     """
     根据图片和文本描述生成视频
@@ -30,6 +35,10 @@ def generate_video_from_image(
         num_frames: 视频帧数（默认14帧）
         fps: 帧率（默认7fps）
         motion_bucket_id: 运动强度（1-255，越大运动越剧烈）
+        local_model_path: 本地模型路径（可选）
+                         - 如果为 None，则从配置文件读取
+                         - 如果为 "" 或空字符串，则禁用本地模型
+                         - 如果指定路径，则使用指定的路径
     """
     print(f"\n开始根据图片生成视频...")
     print(f"输入图片: {image_path}")
@@ -50,8 +59,18 @@ def generate_video_from_image(
     init_image = resize_image(init_image, (1024, 576), keep_aspect=True)
     print(f"调整后尺寸: {init_image.size}")
     
-    # 加载模型
-    print("\n正在加载模型（首次运行需要下载，请耐心等待）...")
+    # 确定本地模型路径的优先级
+    if local_model_path is not None:
+        model_path = local_model_path if local_model_path else None
+    else:
+        model_path = LOCAL_IMAGE_TO_VIDEO_MODEL_PATH if LOCAL_IMAGE_TO_VIDEO_MODEL_PATH else None
+    
+    # 加载模型（优先使用本地模型）
+    print("\n正在加载模型...")
+    if model_path:
+        print(f"本地模型路径: {model_path}")
+    else:
+        print("本地模型: 已禁用（仅使用在线模型）")
     print("注意：视频生成模型较大，下载可能需要较长时间")
     
     # 根据设备选择数据类型
@@ -60,10 +79,17 @@ def generate_video_from_image(
     else:
         torch_dtype = torch.float32
     
+    # 准备模型加载参数
+    model_kwargs = {
+        "torch_dtype": torch_dtype,
+    }
+    
     try:
-        pipe = StableVideoDiffusionPipeline.from_pretrained(
+        pipe = load_diffusion_pipeline_with_fallback(
+            StableVideoDiffusionPipeline,
             "stabilityai/stable-video-diffusion-img2vid",
-            torch_dtype=torch_dtype,
+            model_path,
+            **model_kwargs
         )
         pipe = pipe.to(device)
         
@@ -100,6 +126,7 @@ def generate_video_from_image(
         print("1. 确保已安装所有依赖：pip install -r requirements.txt")
         print("2. 视频生成需要大量内存，建议使用GPU")
         print("3. 如果内存不足，可以尝试减少num_frames参数")
+        print("4. 配置本地模型路径可以避免网络下载问题")
         raise
 
 
