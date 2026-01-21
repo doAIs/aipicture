@@ -186,18 +186,18 @@ def detect_objects(
 
 if __name__ == "__main__":
     # 示例1: 图片分类
-    print("=" * 60)
-    print("示例1: 图片分类")
-    print("=" * 60)
-    image_path = "E:\\GIT_AI\\aipicture\\outputs\\images\\advanced_text_to_image\\lion_basic.png"  # 替换为你的图片路径
-    classify_image(image_path, top_k=5)
+    # print("=" * 60)
+    # print("示例1: 图片分类")
+    # print("=" * 60)
+    # image_path = "E:\\GIT_AI\\aipicture\\outputs\\images\\advanced_text_to_image\\lion_basic.png"  # 替换为你的图片路径
+    # classify_image(image_path, top_k=5)
     
     # 示例2: 目标检测
     print("\n" + "=" * 60)
     print("示例2: 目标检测")
     print("=" * 60)
-    # image_path = "examples/images/test.jpg"  # 替换为你的图片路径
-    # detect_objects(image_path, confidence_threshold=0.5)
+    image_path = "E:\\GIT_AI\\aipicture\\outputs\\images\\advanced_text_to_image\\lion_basic.png"  # 替换为你的图片路径
+    detect_objects(image_path, confidence_threshold=0.5)
     
     print("\n请先准备一张测试图片，然后取消注释上面的代码并运行")
 

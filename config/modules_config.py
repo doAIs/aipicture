@@ -36,14 +36,14 @@ LOCAL_VIDEO_MODEL_PATH = os.getenv("LOCAL_VIDEO_MODEL_PATH", "F:\\modules\\text-
 
 # 图像识别模型
 DEFAULT_IMAGE_RECOGNITION_MODEL = "google/vit-base-patch16-224"  # 图像分类模型
-DEFAULT_OBJECT_DETECTION_MODEL = "yolov8n.pt"  # 目标检测模型（YOLOv8）
+DEFAULT_OBJECT_DETECTION_MODEL = "yolov8x.pt"  # 目标检测模型（YOLOv8）
 
 # ==================== 本地模型路径配置（按模块） ====================
 # 图像识别模型本地路径
 # 支持 Hugging Face 格式的模型目录（如 ViT, ResNet 等）
 LOCAL_IMAGE_RECOGNITION_MODEL_PATH = os.getenv(
     "LOCAL_IMAGE_RECOGNITION_MODEL_PATH", 
-    "F:\\modules\\google\\vit-base-patch16-224"
+    "F:\\modules\\google\\vit-base-patch16-224\\google\\vit-base-patch16-224"
 )
 # 如果设置为 None 或空字符串，则不使用本地模型
 
@@ -51,7 +51,7 @@ LOCAL_IMAGE_RECOGNITION_MODEL_PATH = os.getenv(
 # 支持 .pt 文件或模型目录
 LOCAL_OBJECT_DETECTION_MODEL_PATH = os.getenv(
     "LOCAL_OBJECT_DETECTION_MODEL_PATH", 
-    "F:\\modules\\object-detection\\yolov8n.pt"
+    "F:\\modules\\object-detection\\yolo\\yolov8x.pt"
 )
 # 示例路径：
 # LOCAL_OBJECT_DETECTION_MODEL_PATH = "F:\\modules\\yolov8n.pt"  # Windows
