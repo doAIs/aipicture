@@ -7,9 +7,10 @@ import torch
 from PIL import Image
 import sys
 import os
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from utils.modules_utils import (
-    load_image, get_device, 
+    load_image, get_device,
     load_transformers_model_with_fallback,
     load_yolo_model_with_fallback
 )
@@ -24,9 +25,9 @@ import torch.nn.functional as F
 
 
 def classify_image(
-    image_path: str, 
-    top_k: int = 5,
-    local_model_path: str = None
+        image_path: str,
+        top_k: int = 5,
+        local_model_path: str = None
 ):
     """
     对图片进行分类识别
@@ -44,27 +45,27 @@ def classify_image(
     """
     print(f"\n开始识别图片...")
     print(f"图片路径: {image_path}")
-    
+
     # 获取设备
     device = get_device()
-    
+
     # 加载图片
     image = load_image(image_path)
     print(f"图片尺寸: {image.size}")
-    
+
     # 确定本地模型路径的优先级
     if local_model_path is not None:
         model_path = local_model_path if local_model_path else None
     else:
         model_path = LOCAL_IMAGE_RECOGNITION_MODEL_PATH if LOCAL_IMAGE_RECOGNITION_MODEL_PATH else None
-    
+
     # 加载模型和处理器（优先使用本地模型）
     print("\n正在加载模型...")
     if model_path:
         print(f"本地模型路径: {model_path}")
     else:
         print("本地模型: 已禁用（仅使用在线模型）")
-    
+
     processor, model = load_transformers_model_with_fallback(
         AutoImageProcessor,
         AutoModelForImageClassification,
@@ -73,27 +74,27 @@ def classify_image(
     )
     model = model.to(device)
     model.eval()
-    
+
     print("模型加载完成！")
-    
+
     # 预处理图片
     inputs = processor(image, return_tensors="pt").to(device)
-    
+
     # 进行推理
     print("\n正在识别图片...")
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
-    
+
     # 获取概率
     probs = F.softmax(logits, dim=-1)
-    
+
     # 获取top-k结果
     top_probs, top_indices = torch.topk(probs, top_k)
-    
+
     # 获取类别标签
     id2label = model.config.id2label
-    
+
     results = []
     print(f"\n识别结果（Top {top_k}）:")
     print("-" * 60)
@@ -102,15 +103,15 @@ def classify_image(
         confidence = prob.item() * 100
         results.append((label, confidence))
         print(f"{i}. {label}: {confidence:.2f}%")
-    
+
     print("-" * 60)
     return results
 
 
 def detect_objects(
-    image_path: str, 
-    confidence_threshold: float = 0.5,
-    local_model_path: str = None
+        image_path: str,
+        confidence_threshold: float = 0.5,
+        local_model_path: str = None
 ):
     """
     对图片进行目标检测
@@ -129,34 +130,42 @@ def detect_objects(
     print(f"\n开始检测图片中的物体...")
     print(f"图片路径: {image_path}")
     print(f"置信度阈值: {confidence_threshold}")
-    
+
     # 获取设备
     device = get_device()
     device_str = "cuda" if device == "cuda" else "cpu"
-    
+
     # 确定本地模型路径的优先级
     if local_model_path is not None:
         model_path = local_model_path if local_model_path else None
     else:
         model_path = LOCAL_OBJECT_DETECTION_MODEL_PATH if LOCAL_OBJECT_DETECTION_MODEL_PATH else None
-    
+
     # 加载模型（优先使用本地模型）
     print("\n正在加载YOLO模型...")
     if model_path:
         print(f"本地模型路径: {model_path}")
     else:
         print("本地模型: 已禁用（仅使用在线模型）")
-    
+
     model = load_yolo_model_with_fallback(
         DEFAULT_OBJECT_DETECTION_MODEL,
         model_path
     )
     print("模型加载完成！")
-    
+
     # 进行检测
     print("\n正在检测物体...")
     results = model(image_path, conf=confidence_threshold, device=device_str)
-    
+
+    # results[0].show()
+    import uuid
+
+    # 生成一个新的随机 UUID
+    uuid_value = str(uuid.uuid4())
+
+    results[0].save(filename=uuid_value + ".jpg")  # 保存到文件
+
     # 解析结果
     detections = []
     if len(results) > 0 and results[0].boxes is not None:
@@ -166,13 +175,13 @@ def detect_objects(
             conf = float(boxes.conf[i])
             box = boxes.xyxy[i].tolist()  # [x1, y1, x2, y2]
             label = model.names[cls]
-            
+
             detections.append({
                 "label": label,
                 "confidence": conf * 100,
                 "bbox": box
             })
-    
+
     # 打印结果
     print(f"\n检测到 {len(detections)} 个物体:")
     print("-" * 60)
@@ -180,7 +189,7 @@ def detect_objects(
         print(f"{i}. {det['label']}: {det['confidence']:.2f}%")
         print(f"   位置: ({det['bbox'][0]:.1f}, {det['bbox'][1]:.1f}) -> ({det['bbox'][2]:.1f}, {det['bbox'][3]:.1f})")
     print("-" * 60)
-    
+
     return detections
 
 
@@ -191,13 +200,12 @@ if __name__ == "__main__":
     # print("=" * 60)
     # image_path = "E:\\GIT_AI\\aipicture\\outputs\\images\\advanced_text_to_image\\lion_basic.png"  # 替换为你的图片路径
     # classify_image(image_path, top_k=5)
-    
+
     # 示例2: 目标检测
     print("\n" + "=" * 60)
     print("示例2: 目标检测")
     print("=" * 60)
-    image_path = "E:\\GIT_AI\\aipicture\\outputs\\images\\advanced_text_to_image\\lion_basic.png"  # 替换为你的图片路径
+    image_path = "E:\\GIT_AI\\aipicture\\modules\\image_recognition\\outputs\\images\\u.png"  # 替换为你的图片路径
     detect_objects(image_path, confidence_threshold=0.5)
-    
-    print("\n请先准备一张测试图片，然后取消注释上面的代码并运行")
 
+    print("\n请先准备一张测试图片，然后取消注释上面的代码并运行")
