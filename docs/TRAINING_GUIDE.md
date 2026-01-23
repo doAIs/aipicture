@@ -1,5 +1,7 @@
 # Training Guide
 
+**English** | [中文](TRAINING_GUIDE_CN.md)
+
 Comprehensive guide for training and fine-tuning AI models on the platform.
 
 ## Table of Contents

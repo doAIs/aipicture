@@ -1,5 +1,7 @@
 # AI Multimedia Platform
 
+**English** | [中文](README_CN.md)
+
 A professional commercial-grade AI multimedia processing platform with a modern Vue 3 frontend, FastAPI backend, real-time WebSocket communication, model training capabilities, and comprehensive documentation.
 
 ## ✨ Features

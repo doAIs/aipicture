@@ -1,18 +1,18 @@
-# API Reference
+# API 参考文档
 
-**English** | [中文](API_REFERENCE_CN.md)
+AI 多媒体平台完整 API 文档。
 
-Complete API documentation for the AI Multimedia Platform.
+[English](API_REFERENCE.md) | **中文**
 
-## Base URL
+## 基础 URL
 
 ```
 http://localhost:8000/api
 ```
 
-## Authentication
+## 认证
 
-Most endpoints do not require authentication. For protected endpoints, include the authorization header:
+大多数接口不需要认证。对于受保护的接口，需要在请求头中包含授权信息：
 
 ```
 Authorization: Bearer <token>
@@ -20,21 +20,21 @@ Authorization: Bearer <token>
 
 ---
 
-## Generation APIs
+## 生成类 API
 
-### Text to Image
+### 文生图 (Text to Image)
 
-#### Generate Image
+#### 生成图像
 
 ```http
 POST /text-to-image/generate
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
-  "prompt": "a beautiful sunset over the ocean",
-  "negative_prompt": "blurry, low quality",
+  "prompt": "海边美丽的日落",
+  "negative_prompt": "模糊, 低质量",
   "width": 512,
   "height": 512,
   "num_inference_steps": 50,
@@ -44,7 +44,7 @@ POST /text-to-image/generate
 }
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "task_12345",
@@ -54,13 +54,13 @@ POST /text-to-image/generate
 }
 ```
 
-#### Get Generation Status
+#### 获取生成状态
 
 ```http
 GET /text-to-image/status/{task_id}
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "task_12345",
@@ -70,50 +70,50 @@ GET /text-to-image/status/{task_id}
 }
 ```
 
-#### List Available Models
+#### 获取可用模型列表
 
 ```http
 GET /text-to-image/models
 ```
 
-**Response:**
+**响应：**
 ```json
 [
   {
     "id": "stable-diffusion-v1-5",
     "name": "Stable Diffusion v1.5",
-    "description": "General purpose image generation"
+    "description": "通用图像生成模型"
   },
   {
     "id": "stable-diffusion-xl",
     "name": "Stable Diffusion XL",
-    "description": "High-resolution image generation"
+    "description": "高分辨率图像生成模型"
   }
 ]
 ```
 
 ---
 
-### Image to Image
+### 图生图 (Image to Image)
 
-#### Transform Image
+#### 图像转换
 
 ```http
 POST /image-to-image/generate
 Content-Type: multipart/form-data
 ```
 
-**Form Fields:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| image | File | Yes | Source image |
-| prompt | string | Yes | Transformation prompt |
-| negative_prompt | string | No | Negative prompt |
-| strength | float | No | Transformation strength (0.0-1.0) |
-| num_inference_steps | int | No | Number of steps |
-| guidance_scale | float | No | Guidance scale |
+**表单字段：**
+| 字段 | 类型 | 必填 | 描述 |
+|------|------|------|------|
+| image | File | 是 | 源图像 |
+| prompt | string | 是 | 转换提示词 |
+| negative_prompt | string | 否 | 负面提示词 |
+| strength | float | 否 | 转换强度 (0.0-1.0) |
+| num_inference_steps | int | 否 | 推理步数 |
+| guidance_scale | float | 否 | 引导系数 |
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "task_12346",
@@ -124,80 +124,80 @@ Content-Type: multipart/form-data
 
 ---
 
-### Video Generation
+### 视频生成
 
-#### Text to Video
+#### 文生视频
 
 ```http
 POST /text-to-video/generate
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
-  "prompt": "a cat walking in a garden",
+  "prompt": "一只猫在花园里散步",
   "num_frames": 24,
   "fps": 8,
   "num_inference_steps": 25
 }
 ```
 
-#### Image to Video
+#### 图生视频
 
 ```http
 POST /image-to-video/generate
 Content-Type: multipart/form-data
 ```
 
-**Form Fields:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| image | File | Yes | Source image |
-| num_frames | int | No | Number of frames (default: 24) |
-| fps | int | No | Frames per second (default: 8) |
+**表单字段：**
+| 字段 | 类型 | 必填 | 描述 |
+|------|------|------|------|
+| image | File | 是 | 源图像 |
+| num_frames | int | 否 | 帧数 (默认: 24) |
+| fps | int | 否 | 每秒帧数 (默认: 8) |
 
 ---
 
-## Recognition APIs
+## 识别类 API
 
-### Image Recognition
+### 图像识别
 
-#### Classify Image
+#### 图像分类
 
 ```http
 POST /image-recognition/classify
 Content-Type: multipart/form-data
 ```
 
-**Form Fields:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| image | File | Yes | Image to classify |
-| model | string | No | Model ID |
+**表单字段：**
+| 字段 | 类型 | 必填 | 描述 |
+|------|------|------|------|
+| image | File | 是 | 待分类图像 |
+| model | string | 否 | 模型 ID |
 
-**Response:**
+**响应：**
 ```json
 {
   "classifications": [
-    {"label": "cat", "confidence": 0.95},
-    {"label": "pet", "confidence": 0.89}
+    {"label": "猫", "confidence": 0.95},
+    {"label": "宠物", "confidence": 0.89}
   ]
 }
 ```
 
-#### Detect Objects
+#### 目标检测
 
 ```http
 POST /image-recognition/detect
 Content-Type: multipart/form-data
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "detections": [
     {
-      "label": "person",
+      "label": "人",
       "confidence": 0.92,
       "bbox": [100, 50, 200, 300]
     }
@@ -207,16 +207,16 @@ Content-Type: multipart/form-data
 
 ---
 
-### Face Recognition
+### 人脸识别
 
-#### Detect Faces
+#### 检测人脸
 
 ```http
 POST /face-recognition/detect
 Content-Type: multipart/form-data
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "faces": [
@@ -233,20 +233,20 @@ Content-Type: multipart/form-data
 }
 ```
 
-#### Register Face
+#### 注册人脸
 
 ```http
 POST /face-recognition/register
 Content-Type: multipart/form-data
 ```
 
-**Form Fields:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| image | File | Yes | Face image |
-| name | string | Yes | Person's name |
+**表单字段：**
+| 字段 | 类型 | 必填 | 描述 |
+|------|------|------|------|
+| image | File | 是 | 人脸图像 |
+| name | string | 是 | 人员姓名 |
 
-**Response:**
+**响应：**
 ```json
 {
   "success": true,
@@ -254,20 +254,20 @@ Content-Type: multipart/form-data
 }
 ```
 
-#### Recognize Faces
+#### 识别人脸
 
 ```http
 POST /face-recognition/recognize
 Content-Type: multipart/form-data
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "faces": [
     {
       "face_id": "face_abc123",
-      "name": "John Doe",
+      "name": "张三",
       "confidence": 0.95,
       "bbox": [100, 50, 150, 200]
     }
@@ -277,63 +277,63 @@ Content-Type: multipart/form-data
 
 ---
 
-## Audio APIs
+## 音频 API
 
-### Transcription
+### 语音转录
 
-#### Transcribe Audio
+#### 语音转文字
 
 ```http
 POST /audio/transcribe
 Content-Type: multipart/form-data
 ```
 
-**Form Fields:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| audio | File | Yes | Audio file |
-| language | string | No | Language code (auto-detect if not specified) |
-| model | string | No | Whisper model size |
+**表单字段：**
+| 字段 | 类型 | 必填 | 描述 |
+|------|------|------|------|
+| audio | File | 是 | 音频文件 |
+| language | string | 否 | 语言代码（未指定则自动检测） |
+| model | string | 否 | Whisper 模型大小 |
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "task_audio_001",
   "status": "completed",
-  "text": "Hello, this is a test transcription.",
-  "language": "en",
+  "text": "你好，这是一段测试转录。",
+  "language": "zh",
   "duration": 5.2,
   "segments": [
     {
       "id": 0,
       "start": 0.0,
       "end": 2.5,
-      "text": "Hello, this is"
+      "text": "你好，这是"
     }
   ]
 }
 ```
 
-### Text to Speech
+### 文字转语音
 
-#### Synthesize Speech
+#### 语音合成
 
 ```http
 POST /audio/synthesize
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
-  "text": "Hello, world!",
+  "text": "你好，世界！",
   "voice": "default-female",
-  "language": "en",
+  "language": "zh",
   "speed": 1.0,
   "pitch": 0
 }
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "task_tts_001",
@@ -345,17 +345,17 @@ POST /audio/synthesize
 
 ---
 
-## Training APIs
+## 训练 API
 
-### Model Training
+### 模型训练
 
-#### Start Training
+#### 开始训练
 
 ```http
 POST /training/start
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
   "model_type": "image_classifier",
@@ -369,20 +369,20 @@ POST /training/start
 }
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "train_001"
 }
 ```
 
-#### Get Training Status
+#### 获取训练状态
 
 ```http
 GET /training/status/{task_id}
 ```
 
-**Response:**
+**响应：**
 ```json
 {
   "task_id": "train_001",
@@ -401,7 +401,7 @@ GET /training/status/{task_id}
 }
 ```
 
-#### Stop Training
+#### 停止训练
 
 ```http
 POST /training/stop/{task_id}
@@ -409,15 +409,15 @@ POST /training/stop/{task_id}
 
 ---
 
-### LLM Fine-tuning
+### LLM 微调
 
-#### Start LoRA Training
+#### 开始 LoRA 训练
 
 ```http
 POST /llm-finetuning/lora/start
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
   "base_model": "llama-2-7b",
@@ -434,43 +434,43 @@ POST /llm-finetuning/lora/start
 }
 ```
 
-#### Start QLoRA Training (4-bit)
+#### 开始 QLoRA 训练（4位量化）
 
 ```http
 POST /llm-finetuning/qlora/start
 ```
 
-Same parameters as LoRA, with 4-bit quantization enabled.
+参数与 LoRA 相同，启用 4 位量化。
 
-#### Test Fine-tuned Model
+#### 测试微调模型
 
 ```http
 POST /llm-finetuning/test
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
   "task_id": "lora_001",
-  "prompt": "What is machine learning?",
+  "prompt": "什么是机器学习？",
   "max_tokens": 256
 }
 ```
 
-**Response:**
+**响应：**
 ```json
 {
-  "response": "Machine learning is a subset of artificial intelligence..."
+  "response": "机器学习是人工智能的一个子集..."
 }
 ```
 
-#### Merge Adapter
+#### 合并适配器
 
 ```http
 POST /llm-finetuning/merge
 ```
 
-**Request Body:**
+**请求体：**
 ```json
 {
   "task_id": "lora_001",
@@ -480,18 +480,18 @@ POST /llm-finetuning/merge
 
 ---
 
-## WebSocket Endpoints
+## WebSocket 接口
 
-### Training Progress
+### 训练进度
 
 ```
 ws://localhost:8000/ws/training
 ```
 
-**Message Types:**
+**消息类型：**
 
 ```json
-// Progress update
+// 进度更新
 {
   "type": "progress",
   "data": {
@@ -501,7 +501,7 @@ ws://localhost:8000/ws/training
   }
 }
 
-// Status update
+// 状态更新
 {
   "type": "status",
   "data": {
@@ -510,51 +510,51 @@ ws://localhost:8000/ws/training
   }
 }
 
-// Error
+// 错误
 {
   "type": "error",
   "data": {
     "task_id": "train_001",
-    "message": "Out of memory"
+    "message": "内存不足"
   }
 }
 ```
 
-### Camera Stream
+### 摄像头流
 
 ```
 ws://localhost:8000/ws/camera
 ```
 
-Used for real-time face recognition and object detection with webcam.
+用于实时人脸识别和摄像头目标检测。
 
 ---
 
-## Error Responses
+## 错误响应
 
-All endpoints return errors in the following format:
+所有接口返回的错误格式如下：
 
 ```json
 {
-  "detail": "Error message describing what went wrong"
+  "detail": "描述错误信息的消息"
 }
 ```
 
-**HTTP Status Codes:**
-| Code | Description |
-|------|-------------|
-| 200 | Success |
-| 400 | Bad Request |
-| 404 | Not Found |
-| 422 | Validation Error |
-| 500 | Internal Server Error |
+**HTTP 状态码：**
+| 状态码 | 描述 |
+|--------|------|
+| 200 | 成功 |
+| 400 | 请求错误 |
+| 404 | 未找到 |
+| 422 | 验证错误 |
+| 500 | 服务器内部错误 |
 
 ---
 
-## Rate Limiting
+## 速率限制
 
-Default rate limits:
-- 100 requests per minute for generation endpoints
-- 1000 requests per minute for status endpoints
+默认速率限制：
+- 生成类接口：每分钟 100 次请求
+- 状态查询接口：每分钟 1000 次请求
 
-Custom limits can be configured in the backend settings.
+可在后端设置中自定义限制。
