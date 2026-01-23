@@ -1,0 +1,495 @@
+// Main Styles Entry Point
+// ========================
+
+@import './tech-theme.scss';
+
+// Reset and Base Styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: $text-primary;
+  background: $gradient-primary;
+  @include grid-background;
+  @include tech-scrollbar;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: $text-primary;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.5rem;
+  @include text-glow($neon-cyan);
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+p {
+  color: $text-secondary;
+  margin-bottom: 1em;
+}
+
+a {
+  color: $neon-cyan;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    @include text-glow($neon-cyan);
+  }
+}
+
+// Layout Classes
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 24px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+  
+  &.collapsed {
+    margin-left: 80px;
+  }
+}
+
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+// Card Components
+.tech-card {
+  @include tech-card;
+}
+
+.glass-panel {
+  @include glass-effect;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+// Button Classes
+.btn-neon {
+  @include neon-button($neon-cyan);
+}
+
+.btn-neon-magenta {
+  @include neon-button($neon-magenta);
+}
+
+.btn-neon-green {
+  @include neon-button($neon-green);
+}
+
+.btn-filled {
+  @include filled-button($neon-cyan);
+}
+
+.btn-filled-magenta {
+  @include filled-button($neon-magenta);
+}
+
+.btn-filled-green {
+  @include filled-button($neon-green);
+}
+
+// Input Classes
+.tech-input {
+  @include tech-input;
+  width: 100%;
+}
+
+.tech-textarea {
+  @include tech-input;
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+
+// Form Groups
+.form-group {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: $text-secondary;
+    font-weight: 500;
+  }
+}
+
+// Grid System
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-auto {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+// Flex Utilities
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
+
+// Status Indicators
+.status-online {
+  @include status-indicator($neon-green);
+}
+
+.status-offline {
+  @include status-indicator($neon-orange);
+}
+
+.status-processing {
+  @include status-indicator($neon-cyan);
+}
+
+// Progress Bar
+.progress-bar {
+  @include tech-progress;
+}
+
+// Tags
+.tag {
+  @include tech-tag($neon-cyan);
+}
+
+.tag-success {
+  @include tech-tag($neon-green);
+}
+
+.tag-warning {
+  @include tech-tag($neon-orange);
+}
+
+.tag-info {
+  @include tech-tag($neon-purple);
+}
+
+// Dividers
+.divider {
+  @include tech-divider;
+}
+
+// Section Headers
+.section-title {
+  @include section-title;
+}
+
+// Loading
+.loading-spinner {
+  @include loading-spinner;
+}
+
+// Icon Container
+.icon-box {
+  @include icon-container;
+}
+
+// Utility Classes
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-primary { color: $text-primary; }
+.text-secondary { color: $text-secondary; }
+.text-muted { color: $text-muted; }
+.text-cyan { color: $neon-cyan; }
+.text-magenta { color: $neon-magenta; }
+.text-green { color: $neon-green; }
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mt-4 { margin-top: 32px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.mb-4 { margin-bottom: 32px; }
+
+.p-1 { padding: 8px; }
+.p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+.p-4 { padding: 32px; }
+
+// Element Plus Overrides for Tech Theme
+.el-button--primary {
+  background: linear-gradient(135deg, $neon-cyan 0%, darken($neon-cyan, 15%) 100%) !important;
+  border: none !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, lighten($neon-cyan, 5%) 0%, $neon-cyan 100%) !important;
+    box-shadow: 0 4px 20px rgba($neon-cyan, 0.4);
+  }
+}
+
+.el-input__wrapper {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid $glass-border !important;
+  box-shadow: none !important;
+  
+  &:hover {
+    border-color: rgba($neon-cyan, 0.3) !important;
+  }
+  
+  &.is-focus {
+    border-color: $neon-cyan !important;
+    box-shadow: 0 0 10px rgba($neon-cyan, 0.2) !important;
+  }
+}
+
+.el-input__inner {
+  color: $text-primary !important;
+  
+  &::placeholder {
+    color: $text-muted !important;
+  }
+}
+
+.el-select__wrapper {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid $glass-border !important;
+  box-shadow: none !important;
+}
+
+.el-textarea__inner {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid $glass-border !important;
+  color: $text-primary !important;
+  
+  &:focus {
+    border-color: $neon-cyan !important;
+    box-shadow: 0 0 10px rgba($neon-cyan, 0.2) !important;
+  }
+}
+
+.el-card {
+  @include glass-effect;
+  border-radius: 16px !important;
+  
+  .el-card__header {
+    border-bottom: 1px solid $glass-border;
+    color: $text-primary;
+  }
+  
+  .el-card__body {
+    color: $text-secondary;
+  }
+}
+
+.el-menu {
+  background: transparent !important;
+  border: none !important;
+  
+  .el-menu-item {
+    color: $text-secondary !important;
+    
+    &:hover {
+      background: rgba($neon-cyan, 0.1) !important;
+      color: $neon-cyan !important;
+    }
+    
+    &.is-active {
+      background: rgba($neon-cyan, 0.15) !important;
+      color: $neon-cyan !important;
+      border-right: 3px solid $neon-cyan;
+    }
+  }
+  
+  .el-sub-menu__title {
+    color: $text-secondary !important;
+    
+    &:hover {
+      background: rgba($neon-cyan, 0.1) !important;
+    }
+  }
+}
+
+.el-slider__runway {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-slider__bar {
+  background: $gradient-neon !important;
+}
+
+.el-slider__button {
+  border-color: $neon-cyan !important;
+}
+
+.el-progress-bar__outer {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+.el-progress-bar__inner {
+  background: $gradient-neon !important;
+}
+
+.el-table {
+  background: transparent !important;
+  
+  th.el-table__cell {
+    background: rgba(0, 0, 0, 0.3) !important;
+    color: $text-primary !important;
+    border-bottom: 1px solid $glass-border !important;
+  }
+  
+  td.el-table__cell {
+    background: transparent !important;
+    color: $text-secondary !important;
+    border-bottom: 1px solid rgba($glass-border, 0.5) !important;
+  }
+  
+  tr:hover > td.el-table__cell {
+    background: rgba($neon-cyan, 0.05) !important;
+  }
+}
+
+.el-dialog {
+  @include glass-effect;
+  border-radius: 16px !important;
+  
+  .el-dialog__header {
+    border-bottom: 1px solid $glass-border;
+  }
+  
+  .el-dialog__title {
+    color: $text-primary !important;
+  }
+}
+
+.el-message-box {
+  @include glass-effect;
+  border-radius: 16px !important;
+}
+
+.el-notification {
+  @include glass-effect;
+  border-radius: 12px !important;
+  border-left: 4px solid $neon-cyan !important;
+}
+
+.el-tabs__item {
+  color: $text-secondary !important;
+  
+  &:hover {
+    color: $neon-cyan !important;
+  }
+  
+  &.is-active {
+    color: $neon-cyan !important;
+  }
+}
+
+.el-tabs__active-bar {
+  background: $gradient-neon !important;
+}
+
+.el-upload-dragger {
+  @include glass-effect;
+  border: 2px dashed rgba($neon-cyan, 0.3) !important;
+  border-radius: 12px !important;
+  
+  &:hover {
+    border-color: $neon-cyan !important;
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 1200px) {
+  .grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .grid-3, .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}

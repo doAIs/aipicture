@@ -38,6 +38,16 @@ LOCAL_VIDEO_MODEL_PATH = os.getenv("LOCAL_VIDEO_MODEL_PATH", "F:\\modules\\text-
 DEFAULT_IMAGE_RECOGNITION_MODEL = "google/vit-base-patch16-224"  # 图像分类模型
 DEFAULT_OBJECT_DETECTION_MODEL = "yolov8x.pt"  # 目标检测模型（YOLOv8）
 
+# 面部识别模型
+DEFAULT_FACE_RECOGNITION_MODEL = "hog"  # 面部识别模型（hog 或 cnn）
+
+# 音频处理模型
+DEFAULT_WHISPER_MODEL = "base"  # Whisper语音识别模型
+DEFAULT_TTS_MODEL = "tts_models/en/ljspeech/tacotron2-DDC"  # TTS模型
+
+# LLM模型
+DEFAULT_LLM_MODEL = "microsoft/DialoGPT-medium"  # 默认LLM模型
+
 # ==================== 本地模型路径配置（按模块） ====================
 # 图像识别模型本地路径
 # 支持 Hugging Face 格式的模型目录（如 ViT, ResNet 等）
@@ -56,6 +66,34 @@ LOCAL_OBJECT_DETECTION_MODEL_PATH = os.getenv(
 # 示例路径：
 # LOCAL_OBJECT_DETECTION_MODEL_PATH = "F:\\modules\\yolov8n.pt"  # Windows
 # LOCAL_OBJECT_DETECTION_MODEL_PATH = "/home/user/models/yolov8n.pt"  # Linux
+
+# 面部识别模型本地路径
+LOCAL_FACE_RECOGNITION_MODEL_PATH = os.getenv(
+    "LOCAL_FACE_RECOGNITION_MODEL_PATH", 
+    None  # 默认不使用本地模型
+)
+# 支持人脸数据库目录
+
+# 音频处理模型本地路径
+LOCAL_WHISPER_MODEL_PATH = os.getenv(
+    "LOCAL_WHISPER_MODEL_PATH", 
+    "F:\\modules\\whisper\\base"
+)
+# 支持 Whisper 模型目录
+
+# TTS模型本地路径
+LOCAL_TTS_MODEL_PATH = os.getenv(
+    "LOCAL_TTS_MODEL_PATH", 
+    "F:\\modules\\tts"
+)
+# 支持 TTS 模型目录
+
+# LLM模型本地路径
+LOCAL_LLM_MODEL_PATH = os.getenv(
+    "LOCAL_LLM_MODEL_PATH", 
+    "F:\\modules\\llm\\DialoGPT-medium"
+)
+# 支持 Hugging Face 格式的LLM模型目录
 
 # 图片生成图片模型本地路径（Img2Img）
 LOCAL_IMAGE_TO_IMAGE_MODEL_PATH = os.getenv(
@@ -85,6 +123,25 @@ DEFAULT_GUIDANCE_SCALE = 7.5  # 引导强度（越高越遵循提示词）
 DEFAULT_HEIGHT = 512  # 图片高度
 DEFAULT_WIDTH = 512  # 图片宽度
 DEFAULT_SEED = None  # 随机种子（None表示随机）
+
+# 训练参数默认值
+DEFAULT_TRAINING_EPOCHS = 10  # 默认训练轮数
+DEFAULT_TRAINING_BATCH_SIZE = 8  # 默认批次大小
+DEFAULT_TRAINING_LEARNING_RATE = 5e-5  # 默认学习率
+DEFAULT_TRAINING_WARMUP_STEPS = 100  # 默认预热步数
+
+# LoRA训练参数默认值
+DEFAULT_LORA_RANK = 8  # 默认LoRA等级
+DEFAULT_LORA_ALPHA = 16  # 默认LoRA Alpha
+DEFAULT_LORA_DROPOUT = 0.05  # 默认LoRA Dropout
+
+# 音频处理参数默认值
+DEFAULT_AUDIO_SAMPLE_RATE = 16000  # 默认采样率
+DEFAULT_AUDIO_DURATION = 60  # 默认音频长度（秒）
+
+# 面部识别参数默认值
+DEFAULT_FACE_DETECTION_TOLERANCE = 0.6  # 默认面部识别容差
+DEFAULT_FACE_DETECTION_MODEL = "hog"  # 默认面部检测模型
 
 # 视频生成参数
 DEFAULT_VIDEO_STEPS = 50  # 视频推理步数

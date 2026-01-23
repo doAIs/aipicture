@@ -1,0 +1,361 @@
+// Tech/Sci-Fi Theme Variables and Styles
+// ==========================================
+
+// Color Palette
+$bg-primary: #0a0f1e;
+$bg-secondary: #0f1629;
+$bg-tertiary: #1a1f3e;
+$bg-card: rgba(15, 22, 41, 0.8);
+
+// Neon Accent Colors
+$neon-cyan: #00d4ff;
+$neon-magenta: #ff00ff;
+$neon-green: #00ff88;
+$neon-purple: #a855f7;
+$neon-orange: #ff6b35;
+$neon-yellow: #ffd93d;
+
+// Text Colors
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+$text-muted: rgba(255, 255, 255, 0.5);
+
+// Gradients
+$gradient-primary: linear-gradient(135deg, $bg-primary 0%, $bg-tertiary 100%);
+$gradient-neon: linear-gradient(90deg, $neon-cyan 0%, $neon-magenta 100%);
+$gradient-card: linear-gradient(145deg, rgba(26, 31, 62, 0.6) 0%, rgba(10, 15, 30, 0.8) 100%);
+
+// Glass Effect
+$glass-bg: rgba(255, 255, 255, 0.05);
+$glass-border: rgba(255, 255, 255, 0.1);
+$glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+// Glow Effects
+@mixin neon-glow($color) {
+  box-shadow: 0 0 5px $color,
+              0 0 10px $color,
+              0 0 20px rgba($color, 0.5),
+              0 0 40px rgba($color, 0.3);
+}
+
+@mixin text-glow($color) {
+  text-shadow: 0 0 5px $color,
+               0 0 10px $color,
+               0 0 20px rgba($color, 0.5);
+}
+
+@mixin border-glow($color) {
+  border: 1px solid rgba($color, 0.5);
+  box-shadow: inset 0 0 10px rgba($color, 0.1),
+              0 0 10px rgba($color, 0.2);
+}
+
+// Glass Morphism Mixin
+@mixin glass-effect {
+  background: $glass-bg;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid $glass-border;
+  box-shadow: $glass-shadow;
+}
+
+// Card Styles
+@mixin tech-card {
+  @include glass-effect;
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba($neon-cyan, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba($neon-cyan, 0.1);
+  }
+}
+
+// Button Styles
+@mixin neon-button($color: $neon-cyan) {
+  background: transparent;
+  border: 2px solid $color;
+  color: $color;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba($color, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  &:hover {
+    background: rgba($color, 0.1);
+    @include neon-glow($color);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@mixin filled-button($color: $neon-cyan) {
+  background: linear-gradient(135deg, $color 0%, darken($color, 15%) 100%);
+  border: none;
+  color: $bg-primary;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba($color, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Input Styles
+@mixin tech-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid $glass-border;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: $text-primary;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  
+  &::placeholder {
+    color: $text-muted;
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: $neon-cyan;
+    box-shadow: 0 0 10px rgba($neon-cyan, 0.2);
+  }
+}
+
+// Scrollbar Styles
+@mixin tech-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $bg-secondary;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, $neon-cyan, $neon-purple);
+    border-radius: 4px;
+    
+    &:hover {
+      background: linear-gradient(180deg, lighten($neon-cyan, 10%), lighten($neon-purple, 10%));
+    }
+  }
+}
+
+// Animation Keyframes
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Grid Background Pattern
+@mixin grid-background {
+  background-image: 
+    linear-gradient(rgba($neon-cyan, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($neon-cyan, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+// Particle Background (CSS-only simple version)
+@mixin particle-dots {
+  background-image: radial-gradient(rgba($neon-cyan, 0.15) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+// Status Indicator
+@mixin status-indicator($color) {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: $color;
+  box-shadow: 0 0 10px $color;
+  animation: pulse-glow 2s infinite;
+}
+
+// Progress Bar
+@mixin tech-progress {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 8px;
+  
+  .progress-fill {
+    height: 100%;
+    background: $gradient-neon;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// Tag/Badge Styles
+@mixin tech-tag($color: $neon-cyan) {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba($color, 0.1);
+  border: 1px solid rgba($color, 0.3);
+  border-radius: 20px;
+  color: $color;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+// Tooltip
+@mixin tech-tooltip {
+  @include glass-effect;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: $text-primary;
+  white-space: nowrap;
+}
+
+// Loading Spinner
+@mixin loading-spinner($size: 40px, $color: $neon-cyan) {
+  width: $size;
+  height: $size;
+  border: 3px solid rgba($color, 0.1);
+  border-top-color: $color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Divider with glow
+@mixin tech-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, $glass-border, transparent);
+  margin: 20px 0;
+}
+
+// Section Title
+@mixin section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: $text-primary;
+  margin-bottom: 20px;
+  position: relative;
+  display: inline-block;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: $gradient-neon;
+    border-radius: 2px;
+  }
+}
+
+// Icon Container
+@mixin icon-container($size: 48px, $color: $neon-cyan) {
+  width: $size;
+  height: $size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($color, 0.1);
+  border: 1px solid rgba($color, 0.3);
+  border-radius: 12px;
+  color: $color;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba($color, 0.2);
+    @include border-glow($color);
+  }
+}
