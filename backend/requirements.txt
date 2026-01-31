@@ -66,7 +66,10 @@ ffmpeg-python>=0.2.0  # Video processing automation
 # Real-time voice chat and conversational AI (Future integration)
 # sounddevice>=0.4.6  # Real-time audio I/O
 # pyaudio>=0.2.13  # Alternative audio I/O
-webrtcvad>=2.0.10  # Voice activity detection for real-time chat
+# webrtcvad 在windows下需要额外安装，具体请参见webrtcvad-wheels
+#webrtcvad>=2.0.10  # Voice activity detection for real-time chat
+
+webrtcvad-wheels>=2.0.14
 
 # Training utilities
 datasets>=2.14.0
